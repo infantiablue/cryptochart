@@ -17,19 +17,8 @@
 	</head>
 	<body>
 		<div>
-			<nav class="navbar navbar-expand-lg navbar-light bg-dark px-5">
-				<span class="text-capitalize text-monospace"><a class="navbar-brand text-light" href="/">Chart</a></span>
-				<button
-					class="navbar-toggler"
-					type="button"
-					data-toggle="collapse"
-					data-target="#navbarSupportedContent"
-					aria-controls="navbarSupportedContent"
-					aria-expanded="false"
-					aria-label="Toggle navigation"
-				>
-					<span class="navbar-toggler-icon"></span>
-				</button>
+			<nav class="navbar navbar-expand-lg navbar-light bg-light">
+				<span class="text-capitalize text-monospace ps-3"><a class="navbar-brand text-primary fw-bold" href="/">ETH Chart</a></span>
 			</nav>
 			<div class="mt-2">
 				<div id="latest" class="text-center animate__animated">
@@ -38,6 +27,13 @@
 				<div id="chart"></div>
 			</div>
 		</div>
+		<footer class="footer">
+			<div class="container">
+				<span class="text-muted">
+					<p class="text-center">2021 Made with 🧡 &nbsp; by <a href="https://twitter.com/infantiablue">Truong Phan</a>.</p>
+				</span>
+			</div>
+		</footer>
 	</body>
 	<script>
 		const fetchData = async () => {
@@ -84,13 +80,11 @@
 		const updateChart = () => {
 			fetchData()
 				.then((data) => {
-					// let title = document.querySelector("title").prepend(`${latestPrice} `);
-					// console.log(title.textContent);
 					let latestPriceElm = document.querySelector("#latest");
 					latestPriceElm.classList.remove("animate__fadeIn");
 					let totalPoints = parseInt(data.price.length);
 					let latestPrice = parseFloat(data.price[totalPoints - 1]);
-					let latestIndex = parseFloat(data.index[totalPoints - 1]);
+					// let latestIndex = parseFloat(data.index[totalPoints - 1]);
 					let currentPrice = parseFloat(latestPriceElm.querySelector("h1 span.value").textContent);
 					let lineColor;
 					latestPriceElm.classList.add("animate__fadeIn");
