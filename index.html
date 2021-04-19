@@ -77,40 +77,43 @@
 			Plotly.plot("chart", series, layout);
 		};
 
+		const updateInfo = (data) => {
+			let trend = true;
+			let latestPriceElm = document.querySelector("#latest");
+			latestPriceElm.classList.remove("animate__fadeIn");
+			let totalPoints = parseInt(data.price.length);
+			let latestPrice = parseFloat(data.price[totalPoints - 1]);
+			// let latestIndex = parseFloat(data.index[totalPoints - 1]);
+			let currentPrice = parseFloat(latestPriceElm.querySelector("h1 span.value").textContent);
+			let lineColor;
+			latestPriceElm.classList.add("animate__fadeIn");
+			if (latestPrice > currentPrice) {
+				latestPriceElm.classList.remove("text-danger");
+				latestPriceElm.classList.add("text-success");
+				document.querySelector("title").innerText = `📈 ${latestPrice.toFixed(2)} ETH/USD Realtime`;
+			} else {
+				trend = false;
+				latestPriceElm.classList.remove("text-success");
+				latestPriceElm.classList.add("text-danger");
+				document.querySelector("title").innerText = `📉 ${latestPrice.toFixed(2)} ETH/USD Realtime`;
+			}
+			latestPriceElm.innerHTML = `<h1><span class="currency mr-1">$</span><span class="value">${latestPrice.toFixed(2)}</span></h1>`;
+			return trend;
+		};
 		const updateChart = () => {
 			fetchData()
 				.then((data) => {
-					let latestPriceElm = document.querySelector("#latest");
-					latestPriceElm.classList.remove("animate__fadeIn");
-					let totalPoints = parseInt(data.price.length);
-					let latestPrice = parseFloat(data.price[totalPoints - 1]);
-					// let latestIndex = parseFloat(data.index[totalPoints - 1]);
-					let currentPrice = parseFloat(latestPriceElm.querySelector("h1 span.value").textContent);
-					let lineColor;
-					latestPriceElm.classList.add("animate__fadeIn");
-					if (latestPrice > currentPrice) {
-						lineColor = "green";
-						latestPriceElm.classList.remove("text-danger");
-						latestPriceElm.classList.add("text-success");
-						document.querySelector("title").innerText = `📈 ${latestPrice.toFixed(2)} ETH/USD Realtime`;
-					} else {
-						lineColor = "pink";
-						latestPriceElm.classList.remove("text-success");
-						latestPriceElm.classList.add("text-danger");
-						document.querySelector("title").innerText = `📉 ${latestPrice.toFixed(2)} ETH/USD Realtime`;
-					}
-
-					latestPriceElm.innerHTML = `<h1><span class="currency mr-1">$</span><span class="value">${latestPrice.toFixed(2)}</span></h1>`;
-					let style = {
-						// Convert to client time
-						x: [data.index.map((t) => new Date(t))],
-						y: [data.price],
-						marker: { color: lineColor, size: 3 },
-					};
 					// Delay to fetch data
-					setTimeout(function () {
+					if (data) {
+						let trend = updateInfo(data);
+						let style = {
+							// Convert to client time
+							x: [data.index.map((t) => new Date(t))],
+							y: [data.price],
+							marker: { color: trend ? "green" : "pink", size: 3 },
+						};
 						Plotly.restyle("chart", style);
-					}, 500 * 60);
+					}
 				})
 				.catch((e) => {
 					console.log(e);
