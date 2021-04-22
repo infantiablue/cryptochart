@@ -3,7 +3,7 @@
 		<meta charset="UTF-8" />
 		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>ETH/USD Realtime</title>
+		<title>ETH-USD Realtime</title>
 		<link rel="manifest" href="site.webmanifest" />
 		<link rel="apple-touch-icon" href="ico/apple-touch-icon.png" />
 		<link
@@ -21,16 +21,21 @@
 				<span class="text-capitalize text-monospace ps-3"><a class="navbar-brand text-primary fw-bold" href="/">ETH Chart</a></span>
 			</nav>
 			<div class="mt-2">
-				<div id="latest" class="text-center animate__animated">
-					<h1><span class="value">0</span></h1>
+				<div class="d-flex justify-content-center">
+					<div id="latest">
+						<h5 class="value animate__animated animate__flash animate__slow">Loading ...</h5>
+					</div>
 				</div>
-				<div id="chart"></div>
+				<div class="d-flex justify-content-center">
+					<div id="fluctuation"></div>
+				</div>
+				<div id="chart" class="p-0 m-0"></div>
 			</div>
 		</div>
 		<footer class="footer">
 			<div class="container">
 				<span class="text-muted">
-					<p class="text-center">2021 Made with 🧡 &nbsp; by <a href="https://twitter.com/infantiablue">Truong Phan</a>.</p>
+					<p class="text-center">2021 Made with 🧡&nbsp; by <a href="https://twitter.com/infantiablue">Truong Phan</a>.</p>
 				</span>
 			</div>
 		</footer>
@@ -43,17 +48,16 @@
 					Accept: "application/json",
 				},
 			});
-			if (repsonse.ok) {
-				return repsonse.json();
-			} else {
-				console.log("error");
+			if (!repsonse.ok) {
 				const message = `An error has occured: ${response.status}`;
 				throw new Error(message);
 			}
+			return repsonse.json();
 		};
 
-		const drawChart = async () => {
+		const initChart = async () => {
 			let data = await fetchData();
+			updateInfo(data);
 			let trace = {
 				// Convert to client time
 				x: data.index.map((t) => new Date(t)),
@@ -78,51 +82,61 @@
 		};
 
 		const updateInfo = (data) => {
+			let priceValues = [];
+			data.price.forEach((p) => {
+				priceValues.push(parseFloat(p));
+			});
 			let trend = true;
 			let latestPriceElm = document.querySelector("#latest");
-			latestPriceElm.classList.remove("animate__fadeIn");
+			let fluctuationElm = document.querySelector("#fluctuation");
+			let currentPrice;
+			if (latestPriceElm.querySelector("h1 span.value")) currentPrice = parseFloat(latestPriceElm.querySelector("h1 span.value").textContent);
+			else currentPrice = 0;
 			let totalPoints = parseInt(data.price.length);
 			let latestPrice = parseFloat(data.price[totalPoints - 1]);
-			// let latestIndex = parseFloat(data.index[totalPoints - 1]);
-			let currentPrice = parseFloat(latestPriceElm.querySelector("h1 span.value").textContent);
+			let min = Math.min.apply(Math, priceValues);
+			let max = Math.max.apply(Math, priceValues);
+			let fluctuation = max - min;
+			let percentagefluctuation = ((fluctuation / min) * 100).toFixed(2);
+			let fluctuationClass = fluctuation > 0 ? "text-success" : "text-danger";
+			fluctuationElm.innerHTML = `<h6>Fluctuation (12h):<span class="ms-2 value ${fluctuationClass}">${
+				fluctuation > 0 ? "+" : "-"
+			} ${percentagefluctuation} %</span></h6>`;
+			latestPriceElm.innerHTML = `<h1 class="align-middle">
+				<span class="currency mr-1">$</span><span class="value">${latestPrice.toFixed(2)}</span></h1>`;
+			latestPriceElm.classList.remove("animate__fadeIn");
 			let lineColor;
 			latestPriceElm.classList.add("animate__fadeIn");
 			if (latestPrice > currentPrice) {
 				latestPriceElm.classList.remove("text-danger");
 				latestPriceElm.classList.add("text-success");
-				document.querySelector("title").innerText = `📈 ${latestPrice.toFixed(2)} ETH/USD Realtime`;
+				document.querySelector("title").innerText = `📈 ${latestPrice.toFixed(2)} USD/ETH Realtime`;
 			} else {
 				trend = false;
 				latestPriceElm.classList.remove("text-success");
 				latestPriceElm.classList.add("text-danger");
-				document.querySelector("title").innerText = `📉 ${latestPrice.toFixed(2)} ETH/USD Realtime`;
+				document.querySelector("title").innerText = `📉 ${latestPrice.toFixed(2)} USD/ETH Realtime`;
 			}
-			latestPriceElm.innerHTML = `<h1><span class="currency mr-1">$</span><span class="value">${latestPrice.toFixed(2)}</span></h1>`;
 			return trend;
 		};
-		const updateChart = () => {
-			fetchData()
-				.then((data) => {
-					// Delay to fetch data
-					if (data) {
-						let trend = updateInfo(data);
-						let style = {
-							// Convert to client time
-							x: [data.index.map((t) => new Date(t))],
-							y: [data.price],
-							marker: { color: trend ? "green" : "pink", size: 3 },
-						};
-						Plotly.restyle("chart", style);
-					}
-				})
-				.catch((e) => {
-					console.log(e);
-				});
+		const updateChart = async () => {
+			let data = await fetchData();
+			/**
+			 ** The returned Promise [array] object may not be resolved  so we need to explicitly resolve them
+			 ** Source: https://stackoverflow.com/a/56851570/183846
+			 */
+			let trend = updateInfo(data);
+			let style = {
+				// Convert to client time
+				x: [data.index.map((t) => new Date(t))],
+				y: [data.price],
+				marker: { color: [trend] ? "green" : "pink", size: 3 },
+			};
+			Plotly.restyle("chart", style);
 		};
-		drawChart();
-		updateChart();
+		initChart();
 		setInterval(() => {
 			updateChart();
-		}, 500 * 60);
+		}, 1000 * 60);
 	</script>
 </html>
