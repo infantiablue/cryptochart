@@ -23,7 +23,7 @@ const App = () => {
 			});
 		} else {
 			fetchData().then((result) => {
-				let upTrend = parseFloat(result.price[result.price.length - 1].toFixed(2)) >= latestPrice ? true : false;
+				let upTrend = parseFloat(result.price[result.price.length - 1]) >= latestPrice ? true : false;
 				setUpTrend(upTrend);
 				updateChart(result, upTrend);
 			});
@@ -118,7 +118,7 @@ const App = () => {
 		let min = Math.min.apply(Math, priceValues);
 		let max = Math.max.apply(Math, priceValues);
 		setFluctuation((((max - min) / min) * 100).toFixed(2));
-		setLatestPrice(parseFloat(data.price[data.price.length - 1]).toFixed(2));
+		setLatestPrice(parseFloat(data.price[data.price.length - 1]));
 	};
 
 	const updateChart = (data, trend) => {
