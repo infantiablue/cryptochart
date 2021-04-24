@@ -4,10 +4,8 @@ import callAPI from "../utils";
 const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
-	const [portfolioValue, setPortfolioValue] = useState({});
 
 	useEffect(() => {
-		console.log("calculating ...");
 		callAPI("https://us-central1-techika.cloudfunctions.net/rates").then((result) => {
 			let rates = {};
 			for (const [key, value] of Object.entries(result)) {
@@ -34,17 +32,17 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 				</div>
 				<div id='fluctuation' className='me-3 border-start border-3 border-info my-1' style={{ width: "130px" }}>
 					<div className='card-body text-center'>
-						<h5 className='card-title'>Change</h5>
+						<h5 className='card-title'>Velocity</h5>
 						<h4 className='text-primary '>{fluctuation} %</h4>
 					</div>
 				</div>
-				<div id='' className='me-3 border-start border-3 border-success my-1' style={{ width: "130px" }}>
+				<div className='me-3 border-start border-3 border-success my-1' style={{ width: "130px" }}>
 					<div className='card-body text-center'>
 						<h5 className='card-title'>ETH </h5>
 						<h5 className='text-primary '>{balance.eth}</h5>
 					</div>
 				</div>
-				<div id='' className='me-3 border-start border-3 border-primary my-1' style={{ width: "130px" }}>
+				<div className='me-3 border-start border-3 border-primary my-1' style={{ width: "130px" }}>
 					<div className='card-body text-center'>
 						<h5 className='card-title'>Value </h5>
 						<h5 className='text-primary '>
@@ -52,13 +50,13 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 						</h5>
 					</div>
 				</div>
-				<div id='' className='me-3 border-start border-3 border-dark my-1' style={{ width: "130px" }}>
+				<div className='me-3 border-start border-3 border-warning my-1' style={{ width: "130px" }}>
 					<div className='card-body text-center'>
 						<h5 className='card-title'>Ask</h5>
 						<h5 className='text-primary '>{rates.eth_ask}</h5>
 					</div>
 				</div>
-				<div id='' className='me-3 border-start border-3 border-danger my-1' style={{ width: "130px" }}>
+				<div className='me-3 border-start border-3 border-danger my-1' style={{ width: "130px" }}>
 					<div className='card-body text-center'>
 						<h5 className='card-title'>Bid</h5>
 						<h5 className='text-primary '>{rates.eth_bid}</h5>

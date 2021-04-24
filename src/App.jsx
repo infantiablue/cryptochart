@@ -14,7 +14,7 @@ const App = () => {
 	useEffect(() => {
 		const timerID = setInterval(() => {
 			setCount(count + 1);
-		}, 1000 * 10);
+		}, 1000 * 30);
 		if (count == 0) {
 			fetchData().then((result) => {
 				setLoading(false);
@@ -33,29 +33,81 @@ const App = () => {
 		};
 	}, [count]);
 
-	const fetchData = async () => callAPI("https://us-central1-techika.cloudfunctions.net/crypto");
+	// const fetchData = async () => callAPI("https://us-central1-techika.cloudfunctions.net/crypto");
+	const fetchData = async () => {
+		let data = { index: [], price: [], volumes: [] };
+		let result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
+		for (const item of result.prices) {
+			data.index.push(item[0]);
+			data.price.push(item[1]);
+		}
+		for (const item of result.total_volumes) data.volumes.push(item[1]);
+
+		return data;
+	};
 
 	const initChart = (data) => {
-		let trace = {
+		let trace_price = {
+			name: "Price ($)",
 			x: data.index.map((t) => new Date(t)),
 			y: data.price,
+			xaxis: "x",
+			yaxis: "y1",
 			type: "scatter",
 			mode: "lines+markers",
 			marker: { color: "blue", size: 3 },
 		};
-		let layout = {
-			title: "ETH/USD",
-			xaxis: {
-				// title: "Time",
-				showgrid: true,
-			},
-			yaxis: {
-				// title: "USD",
-				showline: true,
+		let trace_volumes = {
+			name: "Volumne ($B)",
+			x: data.index.map((t) => new Date(t)),
+			y: data.volumes,
+			xaxis: "x",
+			yaxis: "y2",
+			type: "bar",
+			barmode: "relative",
+			marker: {
+				color: "rgb(49,130,189)",
+				opacity: 0.7,
 			},
 		};
-		let series = [trace];
-		Plotly.plot("chart", series, layout);
+		let layout = {
+			// title: "ETH/USD",
+			autosize: true,
+			height: "100%",
+			margin: {
+				l: 50,
+				r: 0,
+				// b: 50,
+				t: 35,
+				pad: 3,
+			},
+			showlegend: false,
+			xaxis: {
+				domain: [1, 1],
+				anchor: "y2",
+			},
+			yaxis: {
+				domain: [0.1, 1],
+				anchor: "x1",
+			},
+			xaxis2: {
+				domain: [1, 1],
+				anchor: "y2",
+			},
+			yaxis2: {
+				showticklabels: false,
+
+				domain: [0, 0.1],
+				anchor: "x1",
+			},
+
+			grid: {
+				roworder: "bottom to top",
+			},
+		};
+		let config = { responsive: true };
+		let series = [trace_price, trace_volumes];
+		Plotly.plot("chart", series, layout, config);
 	};
 
 	const updateInfo = (data) => {
@@ -77,10 +129,12 @@ const App = () => {
 		let style = {
 			// Convert to client time
 			x: [data.index.map((t) => new Date(t))],
-			y: [data.price],
+			y1: [data.price],
+			y2: [data.volumes],
 			marker: { color: trend ? "green" : "pink", size: 3 },
 		};
 		Plotly.restyle("chart", style);
+
 		updateInfo(data);
 	};
 
@@ -108,8 +162,6 @@ const App = () => {
 		</div>
 	);
 };
-
-// import App from "./App";
 
 ReactDOM.render(
 	<React.StrictMode>
