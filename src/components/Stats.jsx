@@ -4,7 +4,8 @@ import callAPI from "../utils";
 const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
-
+	const [portfolioValue, setPortfolioValue] = useState(0);
+	const initInvestment = 35000000;
 	useEffect(() => {
 		callAPI("https://us-central1-techika.cloudfunctions.net/rates").then((result) => {
 			let rates = {};
@@ -19,6 +20,7 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 				balance[key] = parseFloat(value);
 			}
 			setBalance(balance);
+			setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
 		});
 	}, [latestPrice]);
 	return (
@@ -44,10 +46,18 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 				</div>
 				<div className='me-3 border-start border-3 border-primary my-1' style={{ width: "130px" }}>
 					<div className='card-body text-center'>
-						<h5 className='card-title'>Value </h5>
-						<h5 className='text-primary '>
-							{(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", ""))).toLocaleString("us-us", { maximumFractionDigits: 0 })}
+						<h5 className='card-title'>Value</h5>
+						<h5 className={portfolioValue > initInvestment ? "text-success" : "text-danger"}>
+							{portfolioValue.toLocaleString("us-Us", { maximumFractionDigits: 0 })}
 						</h5>
+						<p className='text-muted'>
+							{(portfolioValue - initInvestment).toLocaleString("us-Us", { maximumFractionDigits: 0 })}
+							<br />
+							{(((portfolioValue - initInvestment) / initInvestment) * 100).toLocaleString("us-Us", {
+								maximumFractionDigits: 2,
+							})}{" "}
+							%
+						</p>
 					</div>
 				</div>
 				<div className='me-3 border-start border-3 border-warning my-1' style={{ width: "130px" }}>
