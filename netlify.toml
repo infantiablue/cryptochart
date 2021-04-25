@@ -1,0 +1,9 @@
+# sample netlify.toml
+[build]
+  functions = "functions" # netlify dev uses this directory to scaffold and serve your functions
+  publish = "dist"
+
+# note: each of these fields are OPTIONAL, with an exception that when you're specifying "command" and "targetPort", you must specify framework = "#custom"
+[dev]
+  command = "yarn dev"
+  functions = "functions" # netlify dev uses this directory to scaffold and serve your functions

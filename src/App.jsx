@@ -2,6 +2,7 @@ import ReactDOM, { render } from "react-dom";
 import React, { useState, useEffect } from "react";
 import "./style/index.css";
 import Stats from "./components/Stats";
+import News from "./components/News";
 import callAPI from "./utils";
 
 const App = () => {
@@ -23,7 +24,8 @@ const App = () => {
 			});
 		} else {
 			fetchData().then((result) => {
-				let upTrend = parseFloat(result.price[result.price.length - 1]) >= latestPrice ? true : false;
+				let upTrend = parseFloat(result.price[result.price.length - 1]) > latestPrice ? true : false;
+				console.log(upTrend);
 				setUpTrend(upTrend);
 				updateChart(result, upTrend);
 			});
@@ -33,7 +35,6 @@ const App = () => {
 		};
 	}, [count]);
 
-	// const fetchData = async () => callAPI("https://us-central1-techika.cloudfunctions.net/crypto");
 	const fetchData = async () => {
 		let data = { index: [], price: [], volumes: [] };
 		let result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
@@ -77,7 +78,6 @@ const App = () => {
 			margin: {
 				l: 50,
 				r: 0,
-				// b: 50,
 				t: 35,
 				pad: 3,
 			},
@@ -145,14 +145,15 @@ const App = () => {
 			) : (
 				<>
 					<div className='row align-items-start'>
-						<div className='cold-sm-6 col-md-10'>
+						<div className='cold-sm-6 col-md-9'>
 							<Stats upTrend={upTrend} fluctuation={fluctuation} latestPrice={latestPrice} />
 							<div id='chart' className='p-0 m-0'></div>
 						</div>
-						<div className='col-sm-6 col-md-2'>
+						<div className='col-sm-6 col-md-3'>
 							<div className='animate__animated animate__fadeIn me-3 border-0'>
-								<div className='card-body text-center'>
+								<div className='card-body'>
 									<h4 className='card-title text-info'>News</h4>
+									<News latestPrice={latestPrice} />
 								</div>
 							</div>
 						</div>
