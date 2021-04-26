@@ -19,10 +19,15 @@ const App = () => {
 				"Content-Type": "application/json",
 				Accept: "application/json",
 			},
-		}).then((response) => {
-			if (response.status == 200) setIsOnline(true);
-			else setIsOnline(false);
-		});
+		})
+			.then((response) => {
+				if (response.status == 200) setIsOnline(true);
+				else setIsOnline(false);
+			})
+			.catch((err) => {
+				console.log(err.message);
+				setIsOnline(false);
+			});
 		console.log("ping");
 		const timerID = setInterval(() => {
 			setCount(count + 1);
@@ -35,7 +40,9 @@ const App = () => {
 			});
 		} else {
 			fetchData().then((result) => {
-				let upTrend = parseFloat(result.price[result.price.length - 1]) >= latestPrice ? true : false;
+				let priceChange = parseFloat(result.price[result.price.length - 1]) - result.price[result.price.length - 2];
+				let upTrend;
+				if (priceChange != 0) upTrend = priceChange > 0 ? true : false;
 				setUpTrend(upTrend);
 				updateChart(result, upTrend);
 				updateInfo(result);
@@ -151,20 +158,18 @@ const App = () => {
 	return (
 		<>
 			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
-				<span className='text-capitalize text-monospace ps-3'>
+				<span className='text-capitalize ps-3'>
 					<a className='navbar-brand text-primary fw-bold' href='/'>
 						<img src='/src/ico/eth-logo.png' /> ETH Chart
 					</a>
-				</span>
-				<span>
 					<i
 						className={
-							"bi bi-broadcast animate__animated animate__flash animate__slower animate__infinite " + (isOnline ? "text-success" : " text-danger")
+							"bi bi-broadcast animate__animated  animate__slower animate__infinite " + (isOnline ? "animate__flash text-success" : " text-danger")
 						}
 					></i>
 				</span>
 			</nav>
-			<div className='App mx-3'>
+			<div className='mx-3'>
 				{loading ? (
 					<h6 className='value animate__animated animate__flash animate__slow text-center'> loading ...</h6>
 				) : (
