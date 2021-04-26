@@ -2,15 +2,16 @@ import ReactDOM, { render } from "react-dom";
 import React, { useState, useEffect } from "react";
 import "./style/index.css";
 import Stats from "./components/Stats";
-import News from "./components/News";
+// import News from "./components/News";
 import callAPI from "./utils";
+import logoUrl from "./ico/eth-logo.png";
 
 const App = () => {
 	const [count, setCount] = useState(0);
 	const [latestPrice, setLatestPrice] = useState(null);
 	const [fluctuation, setFluctuation] = useState(null);
 	const [loading, setLoading] = useState(true);
-	const [isOnline, setIsOnline] = useState(false);
+	const [isOnline, setIsOnline] = useState(true);
 	const [upTrend, setUpTrend] = useState(null);
 
 	useEffect(() => {
@@ -21,6 +22,7 @@ const App = () => {
 			},
 		})
 			.then((response) => {
+				console.log("ping");
 				if (response.status == 200) setIsOnline(true);
 				else setIsOnline(false);
 			})
@@ -28,10 +30,9 @@ const App = () => {
 				console.log(err.message);
 				setIsOnline(false);
 			});
-		console.log("ping");
 		const timerID = setInterval(() => {
 			setCount(count + 1);
-		}, 1000 * 30);
+		}, 1000 * 60);
 		if (count == 0) {
 			fetchData().then((result) => {
 				setLoading(false);
@@ -96,7 +97,7 @@ const App = () => {
 			height: "100%",
 			margin: {
 				l: 50,
-				r: 0,
+				r: 20,
 				t: 35,
 				pad: 3,
 			},
@@ -131,7 +132,10 @@ const App = () => {
 		let min = Math.min.apply(Math, priceValues);
 		let max = Math.max.apply(Math, priceValues);
 		setFluctuation((((max - min) / min) * 100).toFixed(2));
-		setLatestPrice(parseFloat(data.price[data.price.length - 1]));
+		let lastPrice = data.price[data.price.length - 1];
+		setLatestPrice(parseFloat(lastPrice));
+		let tilteElm = document.querySelector("title");
+		tilteElm.textContent = `$ ${lastPrice.toFixed(2)} USD/ETH`;
 	};
 
 	const updateChart = (data, upTrend) => {
@@ -160,7 +164,7 @@ const App = () => {
 			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
 				<span className='text-capitalize ps-3'>
 					<a className='navbar-brand text-primary fw-bold' href='/'>
-						<img src='/src/ico/eth-logo.png' /> ETH Chart
+						<img src={logoUrl} /> ETH Chart
 					</a>
 					<i
 						className={
@@ -169,24 +173,24 @@ const App = () => {
 					></i>
 				</span>
 			</nav>
-			<div className='mx-3'>
+			<div className='px-3'>
 				{loading ? (
 					<h6 className='value animate__animated animate__flash animate__slow text-center'> loading ...</h6>
 				) : (
 					<>
 						<div className='row align-items-start'>
-							<div className='cold-sm-6 col-md-9'>
-								<Stats upTrend={upTrend} fluctuation={fluctuation} latestPrice={latestPrice} />
-								<div id='chart' className='p-0 m-0'></div>
-							</div>
-							<div className='col-sm-6 col-md-3'>
+							{/* <div className='cold-sm-6 col-md-9'> */}
+							<Stats upTrend={upTrend} fluctuation={fluctuation} latestPrice={latestPrice} />
+							<div id='chart' className='p-0 m-0'></div>
+							{/* </div> */}
+							{/* <div className='col-sm-6 col-md-3'>
 								<div className='animate__animated animate__fadeIn me-3 border-0'>
 									<div className='card-body'>
 										<h4 className='card-title text-info'>News</h4>
 										<News latestPrice={latestPrice} />
 									</div>
 								</div>
-							</div>
+							</div> */}
 						</div>
 					</>
 				)}
