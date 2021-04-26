@@ -10,9 +10,20 @@ const App = () => {
 	const [latestPrice, setLatestPrice] = useState(null);
 	const [fluctuation, setFluctuation] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [isOnline, setIsOnline] = useState(false);
 	const [upTrend, setUpTrend] = useState(null);
 
 	useEffect(() => {
+		fetch("https://api.coingecko.com/api/v3/ping", {
+			headers: {
+				"Content-Type": "application/json",
+				Accept: "application/json",
+			},
+		}).then((response) => {
+			if (response.status == 200) setIsOnline(true);
+			else setIsOnline(false);
+		});
+		console.log("ping");
 		const timerID = setInterval(() => {
 			setCount(count + 1);
 		}, 1000 * 30);
@@ -24,10 +35,10 @@ const App = () => {
 			});
 		} else {
 			fetchData().then((result) => {
-				let upTrend = parseFloat(result.price[result.price.length - 1]) > latestPrice ? true : false;
-				console.log(upTrend);
+				let upTrend = parseFloat(result.price[result.price.length - 1]) >= latestPrice ? true : false;
 				setUpTrend(upTrend);
 				updateChart(result, upTrend);
+				updateInfo(result);
 			});
 		}
 		return () => {
@@ -38,6 +49,7 @@ const App = () => {
 	const fetchData = async () => {
 		let data = { index: [], price: [], volumes: [] };
 		let result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
+		// let result = await callAPI("https://us-central1-techika.cloudfunctions.net/crypto");
 		for (const item of result.prices) {
 			data.index.push(item[0]);
 			data.price.push(item[1]);
@@ -88,26 +100,20 @@ const App = () => {
 			},
 			yaxis: {
 				domain: [0.1, 1],
-				anchor: "x1",
-			},
-			xaxis2: {
-				domain: [1, 1],
-				anchor: "y2",
+				anchor: "x",
 			},
 			yaxis2: {
 				showticklabels: false,
-
 				domain: [0, 0.1],
-				anchor: "x1",
+				anchor: "x",
 			},
-
 			grid: {
 				roworder: "bottom to top",
 			},
 		};
 		let config = { responsive: true };
 		let series = [trace_price, trace_volumes];
-		Plotly.plot("chart", series, layout, config);
+		Plotly.newPlot("chart", series, layout, config);
 	};
 
 	const updateInfo = (data) => {
@@ -121,46 +127,75 @@ const App = () => {
 		setLatestPrice(parseFloat(data.price[data.price.length - 1]));
 	};
 
-	const updateChart = (data, trend) => {
+	const updateChart = (data, upTrend) => {
+		let trace_price = {
+			x: [data.index.map((t) => new Date(t))],
+			y: [data.price],
+		};
+		let trace_volumes = {
+			x: [data.index.map((t) => new Date(t))],
+			y: [data.volumes],
+		};
 		/**
 		 ** The returned Promise [array] object may not be resolved  so we need to explicitly resolve them
 		 ** Source: https://stackoverflow.com/a/56851570/183846
 		 */
 		let style = {
-			// Convert to client time
-			x: [data.index.map((t) => new Date(t))],
-			y1: [data.price],
-			y2: [data.volumes],
-			marker: { color: trend ? "green" : "pink", size: 3 },
+			marker: { color: upTrend ? "green" : "pink", size: 3 },
 		};
-		Plotly.restyle("chart", style);
-
-		updateInfo(data);
+		Plotly.update("chart", trace_price, {}, 0);
+		Plotly.update("chart", trace_volumes, {}, 1);
+		Plotly.restyle("chart", style, [0, 1]);
 	};
 
 	return (
-		<div className='App mx-3'>
-			{loading ? (
-				<h6 className='value animate__animated animate__flash animate__slow text-center'> loading ...</h6>
-			) : (
-				<>
-					<div className='row align-items-start'>
-						<div className='cold-sm-6 col-md-9'>
-							<Stats upTrend={upTrend} fluctuation={fluctuation} latestPrice={latestPrice} />
-							<div id='chart' className='p-0 m-0'></div>
-						</div>
-						<div className='col-sm-6 col-md-3'>
-							<div className='animate__animated animate__fadeIn me-3 border-0'>
-								<div className='card-body'>
-									<h4 className='card-title text-info'>News</h4>
-									<News latestPrice={latestPrice} />
+		<>
+			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
+				<span className='text-capitalize text-monospace ps-3'>
+					<a className='navbar-brand text-primary fw-bold' href='/'>
+						<img src='/src/ico/eth-logo.png' /> ETH Chart
+					</a>
+				</span>
+				<span>
+					<i
+						className={
+							"bi bi-broadcast animate__animated animate__flash animate__slower animate__infinite " + (isOnline ? "text-success" : " text-danger")
+						}
+					></i>
+				</span>
+			</nav>
+			<div className='App mx-3'>
+				{loading ? (
+					<h6 className='value animate__animated animate__flash animate__slow text-center'> loading ...</h6>
+				) : (
+					<>
+						<div className='row align-items-start'>
+							<div className='cold-sm-6 col-md-9'>
+								<Stats upTrend={upTrend} fluctuation={fluctuation} latestPrice={latestPrice} />
+								<div id='chart' className='p-0 m-0'></div>
+							</div>
+							<div className='col-sm-6 col-md-3'>
+								<div className='animate__animated animate__fadeIn me-3 border-0'>
+									<div className='card-body'>
+										<h4 className='card-title text-info'>News</h4>
+										<News latestPrice={latestPrice} />
+									</div>
 								</div>
 							</div>
 						</div>
-					</div>
-				</>
-			)}
-		</div>
+					</>
+				)}
+			</div>
+			<footer className='footer'>
+				<div className='container'>
+					<span className='text-muted'>
+						<p className='text-center'>
+							2021 Made with 🧡&nbsp; by <a href='https://twitter.com/infantiablue'>Truong Phan</a>.
+						</p>
+					</span>
+				</div>
+			</footer>
+		</>
 	);
 };
 

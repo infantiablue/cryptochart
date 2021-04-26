@@ -5,7 +5,9 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [portfolioValue, setPortfolioValue] = useState(0);
+
 	const initInvestment = 35000000;
+	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
 		let rates = {};
@@ -19,12 +21,15 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 			balance[key] = parseFloat(value);
 		}
 		setBalance(balance);
-		setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
+		if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
+		else {
+			setPortfolioValue(fixedPortfolio);
+		}
 	}, [latestPrice, portfolioValue]);
 	return (
 		<>
 			{!portfolioValue ? (
-				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2'> updating ...</h6>
+				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2'>updating ...</h6>
 			) : (
 				<>
 					<div className='d-flex flex-wrap justify-content-left px-2 py-3'>
