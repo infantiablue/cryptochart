@@ -2,9 +2,7 @@ import ReactDOM, { render } from "react-dom";
 import React, { useState, useEffect } from "react";
 import "./style/index.css";
 import Stats from "./components/Stats";
-// import News from "./components/News";
 import callAPI from "./utils";
-import logoUrl from "./ico/eth-logo.png";
 
 const App = () => {
 	const [count, setCount] = useState(0);
@@ -22,7 +20,7 @@ const App = () => {
 			},
 		})
 			.then((response) => {
-				console.log("ping");
+				// console.log("ping");
 				if (response.status == 200) setIsOnline(true);
 				else setIsOnline(false);
 			})
@@ -30,6 +28,10 @@ const App = () => {
 				console.log(err.message);
 				setIsOnline(false);
 			});
+		/*
+		 * TODO:
+		 * Try https://itnext.io/how-to-work-with-intervals-in-react-hooks-f29892d650f2
+		 */
 		const timerID = setInterval(() => {
 			setCount(count + 1);
 		}, 1000 * 60);
@@ -42,10 +44,10 @@ const App = () => {
 		} else {
 			fetchData().then((result) => {
 				let priceChange = parseFloat(result.price[result.price.length - 1]) - result.price[result.price.length - 2];
-				let upTrend;
-				if (priceChange != 0) upTrend = priceChange > 0 ? true : false;
-				setUpTrend(upTrend);
-				updateChart(result, upTrend);
+				let isUpTrend;
+				if (priceChange != 0) isUpTrend = priceChange > 0 ? true : false;
+				setUpTrend(isUpTrend);
+				updateChart(result, isUpTrend);
 				updateInfo(result);
 			});
 		}
@@ -164,7 +166,7 @@ const App = () => {
 			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
 				<span className='text-capitalize ps-3'>
 					<a className='navbar-brand text-primary fw-bold' href='/'>
-						<img src={logoUrl} /> ETH Chart
+						<img src='/ico/eth-logo.png' /> ETH Chart
 					</a>
 					<i
 						className={
@@ -208,7 +210,7 @@ const App = () => {
 	);
 };
 
-ReactDOM.render(
+render(
 	<React.StrictMode>
 		<App />
 	</React.StrictMode>,
