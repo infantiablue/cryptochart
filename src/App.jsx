@@ -6,8 +6,7 @@ import callAPI from "./utils";
 
 const App = () => {
 	const [count, setCount] = useState(0);
-	const [latestPrice, setLatestPrice] = useState(null);
-	const [fluctuation, setFluctuation] = useState(null);
+	const [chartData, setChartData] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [isOnline, setIsOnline] = useState(true);
 	const [upTrend, setUpTrend] = useState(null);
@@ -38,16 +37,10 @@ const App = () => {
 			fetchData().then((result) => {
 				setLoading(false);
 				initChart(result);
-				updateInfo(result);
 			});
 		} else {
 			fetchData().then((result) => {
-				let priceChange = parseFloat(result.price[result.price.length - 1]) - result.price[result.price.length - 2];
-				let isUpTrend;
-				if (priceChange != 0) isUpTrend = priceChange > 0 ? true : false;
-				setUpTrend(isUpTrend);
-				updateChart(result, isUpTrend);
-				updateInfo(result);
+				updateChart(result);
 			});
 		}
 		return () => {
@@ -63,13 +56,23 @@ const App = () => {
 			data.price.push(item[1]);
 		}
 		for (const item of result.total_volumes) data.volumes.push(item[1]);
+		// Convert to JS Date Object
+		data.index = data.index.map((t) => new Date(t));
+
+		// Set Up/Down Trend
+		let priceChange = parseFloat(data.price[data.price.length - 1]) - data.price[data.price.length - 2];
+		let isUpTrend;
+		if (priceChange != 0) isUpTrend = priceChange >= 0 ? true : false;
+		setUpTrend(isUpTrend);
+
+		setChartData(data);
 		return data;
 	};
 
 	const initChart = (data) => {
 		let trace_price = {
 			name: "Price ($)",
-			x: data.index.map((t) => new Date(t)),
+			x: data.index,
 			y: data.price,
 			xaxis: "x",
 			yaxis: "y1",
@@ -79,7 +82,7 @@ const App = () => {
 		};
 		let trace_volumes = {
 			name: "Volumne ($B)",
-			x: data.index.map((t) => new Date(t)),
+			x: data.index,
 			y: data.volumes,
 			xaxis: "x",
 			yaxis: "y2",
@@ -123,28 +126,14 @@ const App = () => {
 		Plotly.newPlot("chart", series, layout, config);
 	};
 
-	const updateInfo = (data) => {
-		let priceValues = [];
-		data.price.forEach((p) => {
-			priceValues.push(parseFloat(p));
-		});
-		let min = Math.min.apply(Math, priceValues);
-		let max = Math.max.apply(Math, priceValues);
-		setFluctuation((((max - min) / min) * 100).toFixed(2));
-		let lastPrice = data.price[data.price.length - 1];
-		setLatestPrice(parseFloat(lastPrice));
-		let tilteElm = document.querySelector("title");
-		tilteElm.textContent = `$ ${lastPrice.toFixed(2)} USD/ETH`;
-	};
-
-	const updateChart = (data, upTrend) => {
+	const updateChart = (data) => {
 		document.querySelector("#latest-price").classList.remove("animate__fadeIn");
 		let trace_price = {
-			x: [data.index.map((t) => new Date(t))],
+			x: [data.index],
 			y: [data.price],
 		};
 		let trace_volumes = {
-			x: [data.index.map((t) => new Date(t))],
+			x: [data.index],
 			y: [data.volumes],
 		};
 		/**
@@ -181,7 +170,7 @@ const App = () => {
 					<>
 						<div className='row align-items-start'>
 							{/* <div className='cold-sm-6 col-md-9'> */}
-							<Stats upTrend={upTrend} fluctuation={fluctuation} latestPrice={latestPrice} />
+							<Stats upTrend={upTrend} chartData={chartData} />
 							<div id='chart' className='p-0 m-0'></div>
 							{/* </div> */}
 							{/* <div className='col-sm-6 col-md-3'>
