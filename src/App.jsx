@@ -1,4 +1,4 @@
-import ReactDOM, { render } from "react-dom";
+import { render } from "react-dom";
 import React, { useState, useEffect } from "react";
 import "./style/index.css";
 import Stats from "./components/Stats";
@@ -20,7 +20,6 @@ const App = () => {
 			},
 		})
 			.then((response) => {
-				// console.log("ping");
 				if (response.status == 200) setIsOnline(true);
 				else setIsOnline(false);
 			})
@@ -34,7 +33,7 @@ const App = () => {
 		 */
 		const timerID = setInterval(() => {
 			setCount(count + 1);
-		}, 1000 * 60);
+		}, 1000 * 30);
 		if (count == 0) {
 			fetchData().then((result) => {
 				setLoading(false);
@@ -59,13 +58,11 @@ const App = () => {
 	const fetchData = async () => {
 		let data = { index: [], price: [], volumes: [] };
 		let result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
-		// let result = await callAPI("https://us-central1-techika.cloudfunctions.net/crypto");
 		for (const item of result.prices) {
 			data.index.push(item[0]);
 			data.price.push(item[1]);
 		}
 		for (const item of result.total_volumes) data.volumes.push(item[1]);
-
 		return data;
 	};
 
@@ -141,6 +138,7 @@ const App = () => {
 	};
 
 	const updateChart = (data, upTrend) => {
+		document.querySelector("#latest-price").classList.remove("animate__fadeIn");
 		let trace_price = {
 			x: [data.index.map((t) => new Date(t))],
 			y: [data.price],
@@ -159,6 +157,7 @@ const App = () => {
 		Plotly.update("chart", trace_price, {}, 0);
 		Plotly.update("chart", trace_volumes, {}, 1);
 		Plotly.restyle("chart", style, [0, 1]);
+		document.querySelector("#latest-price").classList.add("animate__fadeIn");
 	};
 
 	return (
@@ -177,7 +176,7 @@ const App = () => {
 			</nav>
 			<div className='px-3'>
 				{loading ? (
-					<h6 className='value animate__animated animate__flash animate__slow text-center'> loading ...</h6>
+					<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'> initializing ...</h6>
 				) : (
 					<>
 						<div className='row align-items-start'>

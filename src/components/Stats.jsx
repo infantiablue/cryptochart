@@ -29,17 +29,19 @@ const Stats = ({ upTrend, latestPrice, fluctuation }) => {
 	return (
 		<>
 			{!portfolioValue ? (
-				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2'>updating ...</h6>
+				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'>updating ...</h6>
 			) : (
 				<>
 					<div className='d-flex flex-wrap justify-content-left px-2 py-3'>
-						<div id='latest' className='me-3 border-start border-3 border-primary my-1' style={{ width: "130px" }}>
+						<div className='me-3 border-start border-3 border-primary my-1' style={{ width: "130px" }}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Price</h5>
-								<h4 className={upTrend ? "text-success" : "text-danger"}>${latestPrice.toFixed(2)}</h4>
+								<h4 id='latest-price' className={"animate__animated " + (upTrend ? "text-success" : "text-danger")}>
+									${latestPrice.toFixed(2)}
+								</h4>
 							</div>
 						</div>
-						<div id='fluctuation' className='me-3 border-start border-3 border-info my-1' style={{ width: "130px" }}>
+						<div className='me-3 border-start border-3 border-info my-1' style={{ width: "130px" }}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Velocity</h5>
 								<h4 className='text-primary '>{fluctuation} %</h4>
