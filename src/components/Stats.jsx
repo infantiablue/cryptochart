@@ -75,7 +75,7 @@ const Stats = ({ upTrend, chartData }) => {
 								<h4 className='text-primary '>{velocity} %</h4>
 							</div>
 						</div>
-						<div className='me-3 border-start border-3 border-success my-1' style={blockWidth}>
+						<div className='me-3 border-start border-3 border-purple my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>ETH </h5>
 								<h5 className='text-primary '>{balance.eth}</h5>
@@ -100,17 +100,17 @@ const Stats = ({ upTrend, chartData }) => {
 						<div className='me-3 border-start border-3 border-danger my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Ask</h5>
-								<h5 className='text-primary '>{rates.eth_ask}</h5>
+								<h5 className='text-light-green '>{rates.eth_ask}</h5>
 								<h5 className='card-title'>Bid</h5>
-								<h5 className='text-primary '>{rates.eth_bid}</h5>
+								<h5 className='text-light-red'>{rates.eth_bid}</h5>
 							</div>
 						</div>
-						<div className='me-3 border-start border-3 border-dark my-1' style={blockWidth}>
+						<div className='me-3 border-start border-3 border-success my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>High</h5>
-								<h5 className='text-primary '>$ {lowHigh[1].toFixed(2)}</h5>
+								<h5 className='text-light-green'>${lowHigh[1].toFixed(2)}</h5>
 								<h5 className='card-title'>Low</h5>
-								<h5 className='text-primary '>$ {lowHigh[0].toFixed(2)}</h5>
+								<h5 className='text-light-red'>${lowHigh[0].toFixed(2)}</h5>
 							</div>
 						</div>
 					</div>
