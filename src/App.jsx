@@ -1,46 +1,35 @@
 import React, { useState, useEffect } from "react";
 import "./style/index.scss";
 import Stats from "./components/Stats";
+import Error from "./components/Error";
 import callAPI from "./utils";
 
 const App = () => {
 	const [counter, setCounter] = useState(30);
 	const [chartData, setChartData] = useState({});
 	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState(false);
+	const [errMsg, setErrMsg] = useState(null);
 	const [isOnline, setIsOnline] = useState(true);
 	const [upTrend, setUpTrend] = useState(null);
 
 	useEffect(() => {
-		fetch("https://api.coingecko.com/api/v3/ping", {
-			headers: {
-				"Content-Type": "application/json",
-				Accept: "application/json",
-			},
-		})
-			.then((response) => {
-				if (response.status == 200) setIsOnline(true);
-				else setIsOnline(false);
-			})
-			.catch((err) => {
-				console.log(err.message);
-				setIsOnline(false);
-			});
 		/*
 		 * TODO:
 		 * Try https://itnext.io/how-to-work-with-intervals-in-react-hooks-f29892d650f2
 		 */
-
 		let counterID;
 		fetchData().then((result) => {
+			setIsOnline(true);
 			setLoading(false);
 			initChart(result);
 			counterID = setInterval(() => {
 				setCounter((counter) => {
 					if (counter == 0) {
+						setCounter(30);
 						fetchData().then((result) => {
 							updateChart(result);
 						});
-						setCounter(30);
 					}
 					return counter - 1;
 				});
@@ -53,8 +42,15 @@ const App = () => {
 	}, []);
 
 	const fetchData = async () => {
+		let result;
 		let data = { index: [], price: [], volumes: [] };
-		let result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
+		try {
+			result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
+		} catch (err) {
+			console.log(err.message);
+			setErrMsg("Unable to fetch resources.");
+			setIsOnline(false);
+		}
 		for (const item of result.prices) {
 			data.index.push(item[0]);
 			data.price.push(item[1]);
@@ -67,7 +63,6 @@ const App = () => {
 		let isUpTrend;
 		if (priceChange != 0) isUpTrend = priceChange >= 0 ? true : false;
 		setUpTrend(isUpTrend);
-
 		setChartData(data);
 		return data;
 	};
@@ -92,7 +87,7 @@ const App = () => {
 			type: "bar",
 			barmode: "relative",
 			marker: {
-				color: "#52b69a",
+				color: "#fb8500",
 				opacity: 0.7,
 			},
 		};
@@ -129,7 +124,6 @@ const App = () => {
 	};
 
 	const updateChart = (data) => {
-		document.querySelector("#latest-price").classList.remove("animate__fadeIn");
 		let trace_price = {
 			x: [data.index],
 			y: [data.price],
@@ -138,14 +132,8 @@ const App = () => {
 			x: [data.index],
 			y: [data.volumes],
 		};
-		/**
-		 ** The returned Promise [array] object may not be resolved  so we need to explicitly resolve them
-		 ** Source: https://stackoverflow.com/a/56851570/183846
-		 */
-
 		Plotly.update("chart", trace_price, {}, 0);
 		Plotly.update("chart", trace_volumes, {}, 1);
-		document.querySelector("#latest-price").classList.add("animate__fadeIn");
 	};
 
 	return (
@@ -165,15 +153,18 @@ const App = () => {
 				</span>
 			</nav>
 			<div className='px-3'>
-				{loading ? (
+				{errMsg ? <Error message={errMsg} /> : <></>}
+				{loading && !errMsg ? (
 					<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'> initializing ...</h6>
-				) : (
+				) : !errMsg ? (
 					<>
 						<div className='row align-items-start'>
 							<Stats upTrend={upTrend} chartData={chartData} />
 							<div id='chart' className='p-0 m-0'></div>
 						</div>
 					</>
+				) : (
+					<></>
 				)}
 			</div>
 			<footer className='footer'>

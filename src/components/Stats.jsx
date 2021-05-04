@@ -4,6 +4,7 @@ import callAPI from "../utils";
 const Stats = ({ upTrend, chartData }) => {
 	// Set default width of block stat
 	const blockWidth = { width: "130px" };
+	//
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
@@ -12,7 +13,7 @@ const Stats = ({ upTrend, chartData }) => {
 	const [velocity, setVelocity] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(0.0);
 
-	const initInvestment = 60000000;
+	const initInvestment = 70000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
@@ -46,6 +47,12 @@ const Stats = ({ upTrend, chartData }) => {
 		setVelocity((((max - min) / min) * 100).toFixed(2));
 		let lastPrice = data.price[data.price.length - 1];
 		setLatestPrice(parseFloat(lastPrice));
+		// Ignite effect to latest price div
+		let lastPriceElm = document.querySelector("#latest-price");
+		if (lastPriceElm) {
+			lastPriceElm.classList.add("animate__fadeIn", "animate__slow");
+			lastPriceElm.addEventListener("animationend", () => lastPriceElm.classList.remove("animate__fadeIn", "animate__slow"));
+		}
 		let priceChange = parseFloat(data.price[data.price.length - 1]) - data.price[data.price.length - 2];
 		let percentageChange = (Math.abs(priceChange) / data.price[data.price.length - 2]) * 100;
 		setPercentageChange(percentageChange);
