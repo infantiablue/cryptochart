@@ -4,7 +4,7 @@ import Stats from "./components/Stats";
 import callAPI from "./utils";
 
 const App = () => {
-	const [count, setCount] = useState(0);
+	const [counter, setCounter] = useState(30);
 	const [chartData, setChartData] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [isOnline, setIsOnline] = useState(true);
@@ -29,23 +29,28 @@ const App = () => {
 		 * TODO:
 		 * Try https://itnext.io/how-to-work-with-intervals-in-react-hooks-f29892d650f2
 		 */
-		const timerID = setInterval(() => {
-			setCount(count + 1);
-		}, 1000 * 30);
-		if (count == 0) {
-			fetchData().then((result) => {
-				setLoading(false);
-				initChart(result);
-			});
-		} else {
-			fetchData().then((result) => {
-				updateChart(result);
-			});
-		}
+
+		let counterID;
+		fetchData().then((result) => {
+			setLoading(false);
+			initChart(result);
+			counterID = setInterval(() => {
+				setCounter((counter) => {
+					if (counter == 0) {
+						fetchData().then((result) => {
+							updateChart(result);
+						});
+						setCounter(30);
+					}
+					return counter - 1;
+				});
+			}, 1000);
+		});
+
 		return () => {
-			clearInterval(timerID);
+			clearInterval(counterID);
 		};
-	}, [count]);
+	}, []);
 
 	const fetchData = async () => {
 		let data = { index: [], price: [], volumes: [] };
@@ -151,6 +156,7 @@ const App = () => {
 						<img src='/ico/eth-logo.png' />
 						<span className='text-purple'>ETH Chart</span>
 					</a>
+					<span className='text-muted me-2'>00:{`${counter}`.padStart(2, "0")}</span>
 					<i
 						className={
 							"bi bi-broadcast animate__animated  animate__slower animate__infinite " + (isOnline ? "animate__flash text-success" : " text-danger")
