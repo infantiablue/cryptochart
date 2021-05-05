@@ -1,6 +1,23 @@
-import React, { useState, useEffect } from "react";
-import callAPI from "../utils";
+import React, { useEffect } from "react";
 
-const Chart = ({ upTrend, chartData }) => {
-	// Set default width of block stat
+const Chart = ({ chartData }) => {
+	useEffect(() => {
+		updateChart(chartData);
+	}, [chartData]);
+
+	const updateChart = (data) => {
+		let trace_price = {
+			x: [data.index],
+			y: [data.price],
+		};
+		let trace_volumes = {
+			x: [data.index],
+			y: [data.volumes],
+		};
+		Plotly.update("chart", trace_price, {}, 0);
+		Plotly.update("chart", trace_volumes, {}, 1);
+	};
+	return <div id='chart' className='p-0 m-0'></div>;
 };
+
+export default Chart;

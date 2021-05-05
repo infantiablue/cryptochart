@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from "react";
-import "./style/index.scss";
-import Stats from "./components/Stats";
-import Error from "./components/Error";
 import callAPI from "./utils";
+import "./style/index.scss";
+import Navbar from "./components/Navbar";
+import Stats from "./components/Stats";
+import Chart from "./components/Chart";
+import Footer from "./components/Footer";
+import Error from "./components/Error";
 
 const App = () => {
 	const [counter, setCounter] = useState(30);
 	const [chartData, setChartData] = useState({});
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState(false);
 	const [errMsg, setErrMsg] = useState(null);
 	const [isOnline, setIsOnline] = useState(true);
 	const [upTrend, setUpTrend] = useState(null);
 
 	useEffect(() => {
 		/*
-		 * TODO:
 		 * Try https://itnext.io/how-to-work-with-intervals-in-react-hooks-f29892d650f2
 		 */
 		let counterID;
-		fetchData().then((result) => {
+		fetchChartData().then((result) => {
 			setIsOnline(true);
 			setLoading(false);
 			initChart(result);
@@ -27,9 +28,7 @@ const App = () => {
 				setCounter((counter) => {
 					if (counter == 0) {
 						setCounter(30);
-						fetchData().then((result) => {
-							updateChart(result);
-						});
+						fetchChartData();
 					}
 					return counter - 1;
 				});
@@ -41,7 +40,7 @@ const App = () => {
 		};
 	}, []);
 
-	const fetchData = async () => {
+	const fetchChartData = async () => {
 		let result;
 		let data = { index: [], price: [], volumes: [] };
 		try {
@@ -122,60 +121,25 @@ const App = () => {
 		let series = [trace_price, trace_volumes];
 		Plotly.newPlot("chart", series, layout, config);
 	};
-
-	const updateChart = (data) => {
-		let trace_price = {
-			x: [data.index],
-			y: [data.price],
-		};
-		let trace_volumes = {
-			x: [data.index],
-			y: [data.volumes],
-		};
-		Plotly.update("chart", trace_price, {}, 0);
-		Plotly.update("chart", trace_volumes, {}, 1);
-	};
-
 	return (
 		<>
-			<nav className='navbar navbar-expand-lg navbar-light bg-light'>
-				<span className='text-capitalize ps-3'>
-					<a className='navbar-brand text-primary fw-bold' href='/'>
-						<img src='/ico/eth-logo.png' />
-						<span className='text-purple'>ETH Chart</span>
-					</a>
-					<span className='text-muted me-2'>00:{`${counter}`.padStart(2, "0")}</span>
-					<i
-						className={
-							"bi bi-broadcast animate__animated  animate__slower animate__infinite " + (isOnline ? "animate__flash text-success" : " text-danger")
-						}
-					></i>
-				</span>
-			</nav>
+			<Navbar isOnline={isOnline} counter={counter} />
 			<div className='px-3'>
 				{errMsg ? <Error message={errMsg} /> : <></>}
 				{loading && !errMsg ? (
 					<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'> initializing ...</h6>
 				) : !errMsg ? (
 					<>
-						<div className='row align-items-start'>
+						<div className='row'>
 							<Stats upTrend={upTrend} chartData={chartData} />
-							<div id='chart' className='p-0 m-0'></div>
+							<Chart chartData={chartData} />
 						</div>
 					</>
 				) : (
 					<></>
 				)}
 			</div>
-			<footer className='footer'>
-				<div className='container'>
-					<span className='text-muted'>
-						<p className='text-center'>
-							2021 Made with 🧡&nbsp; by <a href='https://twitter.com/infantiablue'>Truong Phan</a>.
-						</p>
-					</span>
-				</div>
-			</footer>
+			<Footer />
 		</>
 	);
 };
