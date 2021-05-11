@@ -11,4 +11,9 @@ const callAPI = async (url) => {
 	return response.json();
 };
 
-export default callAPI;
+const fadeIn = (elm) => {
+	elm.classList.add("animate__fadeIn", "animate__slow");
+	elm.addEventListener("animationend", () => elm.classList.remove("animate__fadeIn", "animate__slow"));
+};
+
+export { callAPI, fadeIn };

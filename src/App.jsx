@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import callAPI from "./utils";
+import { callAPI } from "./utils";
 import "./style/index.scss";
 import Navbar from "./components/Navbar";
 import Stats from "./components/Stats";

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import callAPI from "../utils";
+import { callAPI, fadeIn } from "../utils";
 
 const Stats = ({ upTrend, chartData }) => {
 	// Set default width of block stat
 	const blockWidth = { width: "130px" };
+	const [loading, setLoading] = useState(true);
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
@@ -17,6 +18,22 @@ const Stats = ({ upTrend, chartData }) => {
 	useEffect(async () => {
 		// Update stats when chartData changed
 		updateStat(chartData);
+		// try {
+		// 	let data = await Promise.all([
+		// 		callAPI("https://us-central1-techika.cloudfunctions.net/rates"), // parse each response as json
+		// 		callAPI("https://us-central1-techika.cloudfunctions.net/balance"),
+		// 	]);
+		// 	for (let i of data) {
+		// 		if ("eth_ask" in i) setRates(i);
+		// 		if ("usdt" in i) setBalance(i);
+		// 	}
+		// } catch (err) {
+		// 	console.log(err);
+		// }
+		// if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
+		// else {
+		// 	setPortfolioValue(fixedPortfolio);
+		// }
 		let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
 		let rates = {};
 		for (const [key, value] of Object.entries(ratesResult)) {
@@ -46,14 +63,13 @@ const Stats = ({ upTrend, chartData }) => {
 		setVelocity((((max - min) / min) * 100).toFixed(2));
 		let lastPrice = data.price[data.price.length - 1];
 		setLatestPrice(parseFloat(lastPrice));
-		// Ignite effect to latest price div
+		// Ignite fade in effect
 		let lastPriceElm = document.querySelector("#latest-price");
-		if (lastPriceElm) {
-			lastPriceElm.classList.add("animate__fadeIn", "animate__slow");
-			lastPriceElm.addEventListener("animationend", () => lastPriceElm.classList.remove("animate__fadeIn", "animate__slow"));
-		}
+		let portfolioValueElm = document.querySelector("#portfolio-value");
+		portfolioValueElm && fadeIn(portfolioValueElm);
+		lastPriceElm && fadeIn(lastPriceElm);
 		let priceChange = parseFloat(data.price[data.price.length - 1]) - data.price[data.price.length - 2];
-		let percentageChange = (Math.abs(priceChange) / data.price[data.price.length - 2]) * 100;
+		let percentageChange = (priceChange / data.price[data.price.length - 2]) * 100;
 		setPercentageChange(percentageChange);
 		let tilteElm = document.querySelector("title");
 		tilteElm.textContent = `${upTrend ? "🔼" : "🔽"} $${lastPrice.toFixed(2)} USD/ETH`;
@@ -75,6 +91,14 @@ const Stats = ({ upTrend, chartData }) => {
 								<h6 className={upTrend ? "text-success" : "text-danger"}>{percentageChange.toFixed(2)} %</h6>
 							</div>
 						</div>
+						<div className='me-3 border-start border-3 border-success my-1' style={blockWidth}>
+							<div className='card-body text-center'>
+								<h5 className='card-title'>High</h5>
+								<h5 className='text-light-green'>${lowHigh[1].toFixed(2)}</h5>
+								<h5 className='card-title'>Low</h5>
+								<h5 className='text-light-red'>${lowHigh[0].toFixed(2)}</h5>
+							</div>
+						</div>
 						<div className='me-3 border-start border-3 border-info my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Velocity</h5>
@@ -90,7 +114,7 @@ const Stats = ({ upTrend, chartData }) => {
 						<div className='me-3 border-start border-3 border-warning my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Value</h5>
-								<h5 className={portfolioValue > initInvestment ? "text-success" : "text-danger"}>
+								<h5 id='portfolio-value' className={"animate__animated " + (portfolioValue > initInvestment ? "text-success" : "text-danger")}>
 									{portfolioValue.toLocaleString("us-Us", { maximumFractionDigits: 0 })}
 								</h5>
 								<p className='text-muted'>
@@ -109,14 +133,6 @@ const Stats = ({ upTrend, chartData }) => {
 								<h5 className='text-light-green '>{rates.eth_ask}</h5>
 								<h5 className='card-title'>Bid</h5>
 								<h5 className='text-light-red'>{rates.eth_bid}</h5>
-							</div>
-						</div>
-						<div className='me-3 border-start border-3 border-success my-1' style={blockWidth}>
-							<div className='card-body text-center'>
-								<h5 className='card-title'>High</h5>
-								<h5 className='text-light-green'>${lowHigh[1].toFixed(2)}</h5>
-								<h5 className='card-title'>Low</h5>
-								<h5 className='text-light-red'>${lowHigh[0].toFixed(2)}</h5>
 							</div>
 						</div>
 					</div>
