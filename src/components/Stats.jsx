@@ -18,22 +18,7 @@ const Stats = ({ upTrend, chartData }) => {
 	useEffect(async () => {
 		// Update stats when chartData changed
 		updateStat(chartData);
-		// try {
-		// 	let data = await Promise.all([
-		// 		callAPI("https://us-central1-techika.cloudfunctions.net/rates"), // parse each response as json
-		// 		callAPI("https://us-central1-techika.cloudfunctions.net/balance"),
-		// 	]);
-		// 	for (let i of data) {
-		// 		if ("eth_ask" in i) setRates(i);
-		// 		if ("usdt" in i) setBalance(i);
-		// 	}
-		// } catch (err) {
-		// 	console.log(err);
-		// }
-		// if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
-		// else {
-		// 	setPortfolioValue(fixedPortfolio);
-		// }
+
 		let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
 		let rates = {};
 		for (const [key, value] of Object.entries(ratesResult)) {
