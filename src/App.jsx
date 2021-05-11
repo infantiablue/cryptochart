@@ -125,18 +125,16 @@ const App = () => {
 		<>
 			<Navbar isOnline={isOnline} counter={counter} />
 			<div className='px-3'>
-				{errMsg ? <Error message={errMsg} /> : <></>}
+				{errMsg && <Error message={errMsg} />}
 				{loading && !errMsg ? (
 					<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'> initializing ...</h6>
-				) : !errMsg ? (
-					<>
+				) : (
+					!errMsg && (
 						<div className='row'>
 							<Stats upTrend={upTrend} chartData={chartData} />
 							<Chart chartData={chartData} />
 						</div>
-					</>
-				) : (
-					<></>
+					)
 				)}
 			</div>
 			<Footer />

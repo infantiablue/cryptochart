@@ -4,7 +4,6 @@ import callAPI from "../utils";
 const Stats = ({ upTrend, chartData }) => {
 	// Set default width of block stat
 	const blockWidth = { width: "130px" };
-	//
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
@@ -13,7 +12,7 @@ const Stats = ({ upTrend, chartData }) => {
 	const [velocity, setVelocity] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(0.0);
 
-	const initInvestment = 70000000;
+	const initInvestment = 75000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
