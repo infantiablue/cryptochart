@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { callAPI, fadeIn } from "../utils";
+import { callAPI } from "../utils";
+import { fadeIn } from "vanjs-toolkit";
 
 const Stats = ({ upTrend, chartData }) => {
 	// Set default width of block stat
@@ -13,7 +14,7 @@ const Stats = ({ upTrend, chartData }) => {
 	const [velocity, setVelocity] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(0.0);
 
-	const initInvestment = 80000000;
+	const initInvestment = 70000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
@@ -70,7 +71,7 @@ const Stats = ({ upTrend, chartData }) => {
 						<div className='me-3 border-start border-3 border-primary my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Price</h5>
-								<h4 id='latest-price' className={"animate__animated " + (upTrend ? "text-success" : "text-danger")}>
+								<h4 id='latest-price' className={upTrend ? "text-success" : "text-danger"}>
 									${latestPrice.toFixed(2)}
 								</h4>
 								<h6 className={upTrend ? "text-success" : "text-danger"}>{percentageChange.toFixed(2)} %</h6>
@@ -99,7 +100,7 @@ const Stats = ({ upTrend, chartData }) => {
 						<div className='me-3 border-start border-3 border-warning my-1' style={blockWidth}>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Value</h5>
-								<h5 id='portfolio-value' className={"animate__animated " + (portfolioValue > initInvestment ? "text-success" : "text-danger")}>
+								<h5 id='portfolio-value' className={portfolioValue > initInvestment ? "text-success" : "text-danger"}>
 									{portfolioValue.toLocaleString("us-Us", { maximumFractionDigits: 0 })}
 								</h5>
 								<p className='text-muted'>

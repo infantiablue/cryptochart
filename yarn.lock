@@ -648,6 +648,11 @@ to-regex-range@^5.0.1:
   dependencies:
     is-number "^7.0.0"
 
+vanjs-toolkit@^0.1.1:
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/vanjs-toolkit/-/vanjs-toolkit-0.1.1.tgz#c54fcd1606bff26487ed18172928305aa82756ca"
+  integrity sha512-g4fNMp1FcePqO8G50YNoQ+Zz01LS1LlDzvlmLNPqyn9vDwBopr1A5oK3k7kqR3sDBGNgN7B2bOf1AZ0qEpqGXQ==
+
 vite@^2.1.5:
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/vite/-/vite-2.2.1.tgz#90c481f69371f32867d86a6a623bb064b876ad3d"
