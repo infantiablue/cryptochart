@@ -123,7 +123,7 @@ const App = () => {
 	};
 	return (
 		<>
-			<Navbar isOnline={isOnline} counter={counter} />
+			<Navbar isOnline={isOnline} counter={counter} errMsg={errMsg} />
 			<div className='px-3'>
 				{errMsg && <Error message={errMsg} />}
 				{loading && !errMsg ? (
