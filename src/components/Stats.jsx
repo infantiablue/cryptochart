@@ -14,7 +14,7 @@ const Stats = ({ upTrend, chartData }) => {
 	const [velocity, setVelocity] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(0.0);
 
-	const initInvestment = 70000000;
+	const initInvestment = 90000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
