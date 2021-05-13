@@ -5,7 +5,6 @@ import { fadeIn } from "vanjs-toolkit";
 const Stats = ({ upTrend, chartData }) => {
 	// Set default width of block stat
 	const blockWidth = { width: "130px" };
-	const [loading, setLoading] = useState(true);
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
@@ -14,7 +13,7 @@ const Stats = ({ upTrend, chartData }) => {
 	const [velocity, setVelocity] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(0.0);
 
-	const initInvestment = 90000000;
+	const initInvestment = 100000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
