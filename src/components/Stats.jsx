@@ -27,13 +27,13 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 			for (const [key, value] of Object.entries(balanceResult)) balance[key] = parseFloat(value);
 			setBalance(balance);
 			setRates(rates);
+			if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
+			else setPortfolioValue(fixedPortfolio);
 		} catch (err) {
 			sendErrMsg(err.message);
 			setPortfolioValue(null);
 			console.log(err.message);
 		}
-		if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
-		else setPortfolioValue(fixedPortfolio);
 	}, [chartData]);
 
 	const updateStat = (data) => {
