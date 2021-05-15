@@ -6,11 +6,7 @@ const Navbar = ({ isOnline, counter, errMsg }) => (
 				<img src='/ico/eth-logo.png' />
 			</a>
 			{!errMsg && <span className='text-muted me-2'>00:{`${counter}`.padStart(2, "0")}</span>}
-			<i
-				className={
-					"bi bi-broadcast animate__animated  animate__slower animate__infinite " + (isOnline ? "animate__flash text-success" : " text-danger")
-				}
-			></i>
+			<i className={"bi bi-broadcast animate__animated  animate__slower animate__infinite " + (isOnline ? "animate__flash text-success" : " text-danger")}></i>
 		</span>
 	</nav>
 );

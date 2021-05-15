@@ -75,12 +75,12 @@ const App = () => {
 			name: "Price ($)",
 			x: data.index,
 			close: data.close,
-			decreasing: { line: { color: "#dc2f02" } },
 			high: data.high,
-			increasing: { line: { color: "#2a9d8f" } },
-			line: { color: "#78c6f7" },
 			low: data.low,
 			open: data.open,
+			increasing: { line: { color: "#2a9d8f" } },
+			decreasing: { line: { color: "#dc2f02" } },
+			line: { color: "#78c6f7" },
 			type: "candlestick",
 			xaxis: "x",
 			yaxis: "y",
@@ -99,12 +99,13 @@ const App = () => {
 			},
 		};
 		let layout = {
+			dragmode: "zoom",
 			autosize: true,
-			height: "100%",
 			margin: {
 				l: 50,
 				r: 20,
 				t: 35,
+				b: 40,
 				pad: 3,
 			},
 			showlegend: false,
@@ -115,6 +116,7 @@ const App = () => {
 				rangeslider: {
 					visible: false,
 				},
+				type: "date",
 			},
 			yaxis: {
 				autorange: true,
@@ -178,7 +180,7 @@ const App = () => {
 				) : (
 					!errMsg && (
 						<div className='row'>
-							<Stats upTrend={upTrend} chartData={chartData} />
+							<Stats upTrend={upTrend} chartData={chartData} sendErrMsg={setErrMsg} />
 							<Chart chartData={chartData} />
 						</div>
 					)

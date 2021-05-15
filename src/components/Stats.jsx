@@ -1,78 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { callAPI } from "../utils";
 import { fadeIn } from "vanjs-toolkit";
-import Error from "./Error";
 
-// var placeholder = document.querySelector("#trades_placeholder"),
-// 	child = null,
-// 	i = 0;
-
-// /**
-//  * This var is an example of subscription message. By changing its event property to: "bts:unsubscribe"
-//  * you can delete your subscription and stop receiving events.
-//  */
-// var subscribeMsg = {
-// 	event: "bts:subscribe",
-// 	data: {
-// 		channel: "live_trades_btcusd",
-// 	},
-// };
-// /**
-//  * Execute a websocket handshake by sending an HTTP upgrade header.
-//  */
-// var ws;
-
-// /**
-//  * Serializes a trade when it's received.
-//  */
-// function serializeTrade(data) {
-// 	if (i === 0) {
-// 		placeholder.innerHTML = "";
-// 	}
-// 	child = document.createElement("div");
-// 	child.innerHTML = "(" + data.timestamp + ") " + data.id + ": " + data.amount + " BTC @ " + data.price + " USD " + data.type;
-// 	placeholder.appendChild(child);
-// 	i++;
-// }
-
-// function initWebsocket() {
-// 	ws = new WebSocket("wss://ws.bitstamp.net");
-
-// 	ws.onopen = function () {
-// 		ws.send(JSON.stringify(subscribeMsg));
-// 	};
-
-// 	ws.onmessage = function (evt) {
-// 		let response = JSON.parse(evt.data);
-// 		console.log(response);
-// 		/**
-// 		 * This switch statement handles message logic. It processes data in case of trade event
-// 		 * and it reconnects if the server requires.
-// 		 */
-// 		switch (response.event) {
-// 			case "trade": {
-// 				serializeTrade(response.data);
-// 				break;
-// 			}
-// 			case "bts:request_reconnect": {
-// 				initWebsocket();
-// 				break;
-// 			}
-// 		}
-// 	};
-// 	/**
-// 	 * In case of unexpected close event, try to reconnect.
-// 	 */
-// 	ws.onclose = function () {
-// 		console.log("Websocket connection closed");
-// 		initWebsocket();
-// 	};
-// }
-
-const Stats = ({ upTrend, chartData }) => {
+const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	// Set default width of block stat
 	const blockWidth = { width: "130px" };
-	const [errMsg, setErrMsg] = useState(null);
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
@@ -86,38 +18,26 @@ const Stats = ({ upTrend, chartData }) => {
 	useEffect(async () => {
 		// Update stats when chartData changed
 		updateStat(chartData);
-
 		try {
 			let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
-			let rates = {};
-
-			for (const [key, value] of Object.entries(ratesResult)) {
-				rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
-			}
-			setRates(rates);
+			let rates = {},
+				balance = {};
+			for (const [key, value] of Object.entries(ratesResult)) rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
 			let balanceResult = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
-			let balance = {};
-			for (const [key, value] of Object.entries(balanceResult)) {
-				balance[key] = parseFloat(value);
-			}
+			for (const [key, value] of Object.entries(balanceResult)) balance[key] = parseFloat(value);
 			setBalance(balance);
+			setRates(rates);
 		} catch (err) {
-			setErrMsg("Unable to fetch resources.");
-			console.log(err);
+			sendErrMsg(err.message);
 			setPortfolioValue(null);
+			console.log(err.message);
 		}
 		if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
-		else {
-			setPortfolioValue(fixedPortfolio);
-		}
-		// initWebsocket();
+		else setPortfolioValue(fixedPortfolio);
 	}, [chartData]);
 
 	const updateStat = (data) => {
-		let priceValues = [];
-		data.price.forEach((p) => {
-			priceValues.push(parseFloat(p));
-		});
+		let priceValues = data.price.map((p) => parseFloat(p));
 		let min = Math.min.apply(Math, priceValues);
 		let max = Math.max.apply(Math, priceValues);
 		setLowHigh([min, max]);
@@ -138,9 +58,7 @@ const Stats = ({ upTrend, chartData }) => {
 
 	return (
 		<>
-			{errMsg ? (
-				<Error message={errMsg} />
-			) : !portfolioValue ? (
+			{!portfolioValue ? (
 				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'>updating ...</h6>
 			) : (
 				<>
