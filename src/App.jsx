@@ -8,7 +8,8 @@ import Footer from "./components/Footer";
 import Error from "./components/Error";
 
 const App = () => {
-	const [counter, setCounter] = useState(30);
+	const TIMER = 15;
+	const [counter, setCounter] = useState(TIMER);
 	const [chartData, setChartData] = useState({});
 	const [loading, setLoading] = useState(true);
 	const [errMsg, setErrMsg] = useState(null);
@@ -27,7 +28,7 @@ const App = () => {
 			counterID = setInterval(() => {
 				setCounter((counter) => {
 					if (counter == 0) {
-						setCounter(30);
+						setCounter(TIMER);
 						fetchChartData();
 					}
 					return counter - 1;
@@ -42,21 +43,24 @@ const App = () => {
 
 	const fetchChartData = async () => {
 		let result;
-		let data = { index: [], price: [], volumes: [] };
+		let data = {};
 		try {
-			result = await callAPI("https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=1&interval=1m");
+			result = await callAPI("https://www.bitstamp.net/api/v2/ohlc/ethusd/?step=180&limit=480");
 		} catch (err) {
 			console.log(err.message);
 			setErrMsg("Unable to fetch resources.");
 			setIsOnline(false);
 		}
-		for (const item of result.prices) {
-			data.index.push(item[0]);
-			data.price.push(item[1]);
+		for (const item of result.data.ohlc) {
+			for (const prop in item) {
+				data[prop] = data[prop] || [];
+				data[prop].push(item[prop]);
+			}
 		}
-		for (const item of result.total_volumes) data.volumes.push(item[1]);
 		// Convert to JS Date Object
-		data.index = data.index.map((t) => new Date(t));
+		data.index = data.timestamp.map((t) => new Date(parseInt(t) * 1000));
+		// Adjust to legacy components
+		data.price = data.close;
 		// Set Up/Down Trend
 		let priceChange = parseFloat(data.price[data.price.length - 1]) - data.price[data.price.length - 2];
 		let isUpTrend;
@@ -70,23 +74,27 @@ const App = () => {
 		let trace_price = {
 			name: "Price ($)",
 			x: data.index,
-			y: data.price,
+			close: data.close,
+			decreasing: { line: { color: "#dc2f02" } },
+			high: data.high,
+			increasing: { line: { color: "#2a9d8f" } },
+			line: { color: "#78c6f7" },
+			low: data.low,
+			open: data.open,
+			type: "candlestick",
 			xaxis: "x",
-			yaxis: "y1",
-			type: "scatter",
-			mode: "lines+markers",
-			marker: { color: "#78c6f7", size: 3 },
+			yaxis: "y",
 		};
 		let trace_volumes = {
-			name: "Volumne ($B)",
+			name: "Volumne (Eth)",
 			x: data.index,
-			y: data.volumes,
+			y: data.volume,
 			xaxis: "x",
 			yaxis: "y2",
 			type: "bar",
 			barmode: "relative",
 			marker: {
-				color: "#fb8500",
+				color: "#0077b6",
 				opacity: 0.7,
 			},
 		};
@@ -101,21 +109,60 @@ const App = () => {
 			},
 			showlegend: false,
 			xaxis: {
+				autorange: true,
 				domain: [1, 1],
 				anchor: "y2",
+				rangeslider: {
+					visible: false,
+				},
 			},
 			yaxis: {
-				domain: [0.2, 1],
+				autorange: true,
+				type: "linear",
+				domain: [0.25, 1],
 				anchor: "x",
 			},
 			yaxis2: {
 				showticklabels: true,
-				domain: [0, 0.2],
+				domain: [0, 0.25],
 				anchor: "x",
 			},
 			grid: {
 				roworder: "bottom to top",
 			},
+			/*
+			 * TODO: largest movement
+			 */
+			// annotations: [
+			// 	{
+			// 		x: data.index[data.index.length - 1],
+			// 		y: 0.9,
+			// 		xref: "x",
+			// 		yref: "paper",
+			// 		text: "largest movement",
+			// 		font: { color: "magenta" },
+			// 		showarrow: true,
+			// 		xanchor: "right",
+			// 		ax: -20,
+			// 		ay: 0,
+			// 	},
+			// ],
+			// shapes: [
+			// 	{
+			// 		type: "rect",
+			// 		xref: "x",
+			// 		yref: "paper",
+			// 		x0: data.index[40],
+			// 		y0: 0,
+			// 		x1: data.index[data.index.length - 1],
+			// 		y1: 1,
+			// 		fillcolor: "#d3d3d3",
+			// 		opacity: 0.2,
+			// 		line: {
+			// 			width: 0,
+			// 		},
+			// 	},
+			// ],
 		};
 		let config = { responsive: true };
 		let series = [trace_price, trace_volumes];

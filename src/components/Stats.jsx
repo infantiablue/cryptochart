@@ -1,10 +1,78 @@
 import React, { useState, useEffect } from "react";
 import { callAPI } from "../utils";
 import { fadeIn } from "vanjs-toolkit";
+import Error from "./Error";
+
+// var placeholder = document.querySelector("#trades_placeholder"),
+// 	child = null,
+// 	i = 0;
+
+// /**
+//  * This var is an example of subscription message. By changing its event property to: "bts:unsubscribe"
+//  * you can delete your subscription and stop receiving events.
+//  */
+// var subscribeMsg = {
+// 	event: "bts:subscribe",
+// 	data: {
+// 		channel: "live_trades_btcusd",
+// 	},
+// };
+// /**
+//  * Execute a websocket handshake by sending an HTTP upgrade header.
+//  */
+// var ws;
+
+// /**
+//  * Serializes a trade when it's received.
+//  */
+// function serializeTrade(data) {
+// 	if (i === 0) {
+// 		placeholder.innerHTML = "";
+// 	}
+// 	child = document.createElement("div");
+// 	child.innerHTML = "(" + data.timestamp + ") " + data.id + ": " + data.amount + " BTC @ " + data.price + " USD " + data.type;
+// 	placeholder.appendChild(child);
+// 	i++;
+// }
+
+// function initWebsocket() {
+// 	ws = new WebSocket("wss://ws.bitstamp.net");
+
+// 	ws.onopen = function () {
+// 		ws.send(JSON.stringify(subscribeMsg));
+// 	};
+
+// 	ws.onmessage = function (evt) {
+// 		let response = JSON.parse(evt.data);
+// 		console.log(response);
+// 		/**
+// 		 * This switch statement handles message logic. It processes data in case of trade event
+// 		 * and it reconnects if the server requires.
+// 		 */
+// 		switch (response.event) {
+// 			case "trade": {
+// 				serializeTrade(response.data);
+// 				break;
+// 			}
+// 			case "bts:request_reconnect": {
+// 				initWebsocket();
+// 				break;
+// 			}
+// 		}
+// 	};
+// 	/**
+// 	 * In case of unexpected close event, try to reconnect.
+// 	 */
+// 	ws.onclose = function () {
+// 		console.log("Websocket connection closed");
+// 		initWebsocket();
+// 	};
+// }
 
 const Stats = ({ upTrend, chartData }) => {
 	// Set default width of block stat
 	const blockWidth = { width: "130px" };
+	const [errMsg, setErrMsg] = useState(null);
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
@@ -19,22 +87,30 @@ const Stats = ({ upTrend, chartData }) => {
 		// Update stats when chartData changed
 		updateStat(chartData);
 
-		let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
-		let rates = {};
-		for (const [key, value] of Object.entries(ratesResult)) {
-			rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
+		try {
+			let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
+			let rates = {};
+
+			for (const [key, value] of Object.entries(ratesResult)) {
+				rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
+			}
+			setRates(rates);
+			let balanceResult = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
+			let balance = {};
+			for (const [key, value] of Object.entries(balanceResult)) {
+				balance[key] = parseFloat(value);
+			}
+			setBalance(balance);
+		} catch (err) {
+			setErrMsg("Unable to fetch resources.");
+			console.log(err);
+			setPortfolioValue(null);
 		}
-		setRates(rates);
-		let balanceResult = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
-		let balance = {};
-		for (const [key, value] of Object.entries(balanceResult)) {
-			balance[key] = parseFloat(value);
-		}
-		setBalance(balance);
 		if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
 		else {
 			setPortfolioValue(fixedPortfolio);
 		}
+		// initWebsocket();
 	}, [chartData]);
 
 	const updateStat = (data) => {
@@ -57,12 +133,14 @@ const Stats = ({ upTrend, chartData }) => {
 		let percentageChange = (priceChange / data.price[data.price.length - 2]) * 100;
 		setPercentageChange(percentageChange);
 		let tilteElm = document.querySelector("title");
-		tilteElm.textContent = `${upTrend ? "🔼" : "🔽"} $${lastPrice.toFixed(2)} USD/ETH`;
+		tilteElm.textContent = `${upTrend ? "🔼" : "🔽"} $${lastPrice} USD/ETH`;
 	};
 
 	return (
 		<>
-			{!portfolioValue ? (
+			{errMsg ? (
+				<Error message={errMsg} />
+			) : !portfolioValue ? (
 				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'>updating ...</h6>
 			) : (
 				<>
@@ -71,7 +149,7 @@ const Stats = ({ upTrend, chartData }) => {
 							<div className='card-body text-center'>
 								<h5 className='card-title'>Price</h5>
 								<h4 id='latest-price' className={upTrend ? "text-success" : "text-danger"}>
-									${latestPrice.toFixed(2)}
+									${latestPrice}
 								</h4>
 								<h6 className={upTrend ? "text-success" : "text-danger"}>{percentageChange.toFixed(2)} %</h6>
 							</div>

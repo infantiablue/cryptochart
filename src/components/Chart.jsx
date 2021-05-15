@@ -8,11 +8,14 @@ const Chart = ({ chartData }) => {
 	const updateChart = (data) => {
 		let trace_price = {
 			x: [data.index],
-			y: [data.price],
+			close: [data.close],
+			high: [data.high],
+			low: [data.low],
+			open: [data.open],
 		};
 		let trace_volumes = {
 			x: [data.index],
-			y: [data.volumes],
+			y: [data.volume],
 		};
 		Plotly.update("chart", trace_price, {}, 0);
 		Plotly.update("chart", trace_volumes, {}, 1);
