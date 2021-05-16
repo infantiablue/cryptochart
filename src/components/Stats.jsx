@@ -11,27 +11,43 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	const [latestPrice, setLatestPrice] = useState(0.0);
 	const [percentageChange, setPercentageChange] = useState(0.0);
 	const [velocity, setVelocity] = useState(0.0);
-	const [portfolioValue, setPortfolioValue] = useState(0.0);
+	const [portfolioValue, setPortfolioValue] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const initInvestment = 100000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
 		updateStat(chartData);
+		// try {
+		// 	let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/cors/https://api.remitano.com/api/v1/rates/ads");
+		// 	let rates = {};
+		// 	for (const [key, value] of Object.entries(ratesResult.vn)) {
+		// 		rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
+		// 	}
+		// 	setRates(rates);
+		// } catch (err) {
+		// 	try {
+		// 		console.log(err);
+		// 		let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
+		// 		let rates = {};
+		// 		for (const [key, value] of Object.entries(ratesResult)) {
+		// 			rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
+		// 		}
+		// 		setRates(rates);
+		// 	} catch (err) {
+		// 		setRates(null);
+		// 	}
+		// }
 		try {
-			let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
+			//TODO: implement clever wayt to handle error from Google Cloud functions
+			let balanceResult = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
+			let balance = {};
 			let rates = {};
-			for (const [key, value] of Object.entries(ratesResult)) {
+			for (const [key, value] of Object.entries(balanceResult.rates)) {
 				rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
 			}
 			setRates(rates);
-		} catch (err) {
-			setRates(null);
-		}
-		try {
-			let balanceResult = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
-			let balance = {};
-			for (const [key, value] of Object.entries(balanceResult)) {
+			for (const [key, value] of Object.entries(balanceResult.balance)) {
 				balance[key] = parseFloat(value);
 			}
 			setBalance(balance);
@@ -40,7 +56,10 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 				setPortfolioValue(fixedPortfolio);
 			}
 		} catch (err) {
+			console.log(err.message);
 			setBalance(null);
+			setRates(null);
+			setPortfolioValue(null);
 		}
 		setLoading(false);
 	}, [chartData]);
@@ -96,42 +115,40 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 							</div>
 						</div>
 						{balance && (
-							<>
-								<div className='stats me-3 border-start border-3 border-purple my-1'>
-									<div className='card-body text-center'>
-										<h5 className='card-title'>ETH </h5>
-										<h5 className='text-primary '>{balance.eth}</h5>
-									</div>
+							<div className='stats me-3 border-start border-3 border-purple my-1'>
+								<div className='card-body text-center'>
+									<h5 className='card-title'>ETH</h5>
+									<h5 className='text-primary'>{balance.eth}</h5>
 								</div>
-							</>
+							</div>
 						)}
+						{portfolioValue && !Number.isNaN(portfolioValue) && balance ? (
+							<div className='stats me-3 border-start border-3 border-warning my-1'>
+								<div className='card-body text-center'>
+									<h5 className='card-title'>Value</h5>
+									<h5 id='portfolio-value' className={portfolioValue > initInvestment ? "text-success" : "text-danger"}>
+										{portfolioValue.toLocaleString("us-Us", { maximumFractionDigits: 0 })}
+									</h5>
+									<p className='text-muted'>
+										{(portfolioValue - initInvestment).toLocaleString("us-Us", { maximumFractionDigits: 0 })}
+										<br />
+										{(((portfolioValue - initInvestment) / initInvestment) * 100).toLocaleString("us-Us", {
+											maximumFractionDigits: 2,
+										})}
+										%
+									</p>
+								</div>
+							</div>
+						) : null}
 						{rates && (
-							<>
-								<div className='stats me-3 border-start border-3 border-warning my-1'>
-									<div className='card-body text-center'>
-										<h5 className='card-title'>Value</h5>
-										<h5 id='portfolio-value' className={portfolioValue > initInvestment ? "text-success" : "text-danger"}>
-											{portfolioValue.toLocaleString("us-Us", { maximumFractionDigits: 0 })}
-										</h5>
-										<p className='text-muted'>
-											{(portfolioValue - initInvestment).toLocaleString("us-Us", { maximumFractionDigits: 0 })}
-											<br />
-											{(((portfolioValue - initInvestment) / initInvestment) * 100).toLocaleString("us-Us", {
-												maximumFractionDigits: 2,
-											})}{" "}
-											%
-										</p>
-									</div>
+							<div className='stats me-3 border-start border-3 border-danger my-1'>
+								<div className='card-body text-center'>
+									<h5 className='card-title'>Ask</h5>
+									<h5 className='text-light-green '>{rates.eth_ask}</h5>
+									<h5 className='card-title'>Bid</h5>
+									<h5 className='text-light-red'>{rates.eth_bid}</h5>
 								</div>
-								<div className='stats me-3 border-start border-3 border-danger my-1'>
-									<div className='card-body text-center'>
-										<h5 className='card-title'>Ask</h5>
-										<h5 className='text-light-green '>{rates.eth_ask}</h5>
-										<h5 className='card-title'>Bid</h5>
-										<h5 className='text-light-red'>{rates.eth_bid}</h5>
-									</div>
-								</div>
-							</>
+							</div>
 						)}
 					</div>
 					{}
