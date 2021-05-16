@@ -18,49 +18,28 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	useEffect(async () => {
 		// Update stats when chartData changed
 		updateStat(chartData);
-		// try {
-		// 	let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/cors/https://api.remitano.com/api/v1/rates/ads");
-		// 	let rates = {};
-		// 	for (const [key, value] of Object.entries(ratesResult.vn)) {
-		// 		rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
-		// 	}
-		// 	setRates(rates);
-		// } catch (err) {
-		// 	try {
-		// 		console.log(err);
-		// 		let ratesResult = await callAPI("https://us-central1-techika.cloudfunctions.net/rates");
-		// 		let rates = {};
-		// 		for (const [key, value] of Object.entries(ratesResult)) {
-		// 			rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
-		// 		}
-		// 		setRates(rates);
-		// 	} catch (err) {
-		// 		setRates(null);
-		// 	}
-		// }
-		try {
-			//TODO: implement clever wayt to handle error from Google Cloud functions
-			let balanceResult = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
-			let balance = {};
-			let rates = {};
-			for (const [key, value] of Object.entries(balanceResult.rates)) {
-				rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
-			}
+		let resp = await callAPI("https://us-central1-techika.cloudfunctions.net/balance");
+		let balance = {},
+			rates = {};
+		if (!("error" in resp.balance)) {
+			for (const [key, value] of Object.entries(resp.rates)) rates[key] = value.toLocaleString("us-Us", { maximumFractionDigits: 0 });
 			setRates(rates);
-			for (const [key, value] of Object.entries(balanceResult.balance)) {
-				balance[key] = parseFloat(value);
-			}
+		} else {
+			console.error(resp.blance.error);
+			setRates(null);
+		}
+
+		if (!("error" in resp.rates)) {
+			for (const [key, value] of Object.entries(resp.balance)) balance[key] = parseFloat(value);
 			setBalance(balance);
 			if (balance.eth != 0) setPortfolioValue(parseFloat(balance.eth) * parseInt(String(rates.eth_bid).replaceAll(",", "")));
-			else {
-				setPortfolioValue(fixedPortfolio);
-			}
-		} catch (err) {
-			console.log(err.message);
+			else setPortfolioValue(fixedPortfolio);
+		} else {
+			console.error(resp.rates.error);
 			setBalance(null);
-			setRates(null);
 			setPortfolioValue(null);
 		}
+
 		setLoading(false);
 	}, [chartData]);
 
