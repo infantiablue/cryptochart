@@ -1,4 +1,5 @@
 const callAPI = async (url) => {
+	console.log("calling API");
 	let response = await fetch(url, {
 		headers: {
 			"Content-Type": "application/json",

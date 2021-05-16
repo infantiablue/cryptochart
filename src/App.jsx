@@ -8,7 +8,7 @@ import Footer from "./components/Footer";
 import Error from "./components/Error";
 
 const App = () => {
-	const TIMER = 15;
+	const TIMER = 30;
 	const [counter, setCounter] = useState(TIMER);
 	const [chartData, setChartData] = useState({});
 	const [loading, setLoading] = useState(true);
