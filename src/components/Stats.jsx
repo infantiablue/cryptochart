@@ -43,9 +43,8 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	}, [chartData]);
 
 	const updateStat = (data) => {
-		let priceValues = data.price.map((p) => parseFloat(p));
-		let min = Math.min.apply(Math, priceValues);
-		let max = Math.max.apply(Math, priceValues);
+		let min = Math.min.apply(Math, data.price);
+		let max = Math.max.apply(Math, data.price);
 		setLowHigh([min, max]);
 		setVolatility((((max - min) / min) * 100).toFixed(2));
 		let lastPrice = data.price[data.price.length - 1];

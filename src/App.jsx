@@ -60,7 +60,7 @@ const App = () => {
 		// Convert to JS Date Object
 		data.index = data.timestamp.map((t) => new Date(parseInt(t) * 1000));
 		// Adjust to legacy components
-		data.price = data.close;
+		data.price = data.close.map((p) => parseFloat(p));
 		// Set Up/Down Trend
 		let priceChange = parseFloat(data.price[data.price.length - 1]) - data.price[data.price.length - 2];
 		let isUpTrend;
@@ -72,9 +72,9 @@ const App = () => {
 
 	const initChart = (data) => {
 		let high = Math.max.apply(Math, data.price);
-		let highIndex = data.price.indexOf(String(high));
+		let highIndex = data.price.indexOf(high);
 		let low = Math.min.apply(Math, data.price);
-		let lowIndex = data.price.indexOf(String(low));
+		let lowIndex = data.price.indexOf(low);
 		let trace_price = {
 			name: "Price ($)",
 			x: data.index,
