@@ -12,7 +12,7 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	const [volatility, setVolatility] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(null);
 	const [loading, setLoading] = useState(true);
-	const initInvestment = 120000000;
+	const initInvestment = 130000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
@@ -68,17 +68,21 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 				<h6 className='value animate__animated animate__flash animate__slow text-center mt-2 py-2'>updating ...</h6>
 			) : (
 				<>
-					<div className='d-flex flex-wrap justify-content-center py-3'>
-						<div className='stats me-3 border-start border-3 border-primary my-1'>
+					<div className='d-flex flex-wrap justify-content-start py-2'>
+						<div className='stats border-3 border-primary my-1'>
 							<div className='card-body text-center'>
-								<h5 className='card-title'>Price</h5>
+								<div className='d-flex'>
+									<h5 className='card-title flex-grow-1'>Price</h5>
+									<span className={upTrend ? "text-success" : "text-danger"}>{percentageChange.toFixed(2)} %</span>
+								</div>
 								<h4 id='latest-price' className={upTrend ? "text-success" : "text-danger"}>
 									${latestPrice}
 								</h4>
-								<h6 className={upTrend ? "text-success" : "text-danger"}>{percentageChange.toFixed(2)} %</h6>
+								<h5 className='card-title'>Volatility</h5>
+								<h4 className='text-primary '>{volatility} %</h4>
 							</div>
 						</div>
-						<div className='stats me-3 border-start border-3 border-success my-1'>
+						<div className='stats border-3 border-success my-1'>
 							<div className='card-body text-center'>
 								<h5 className='card-title'>High</h5>
 								<h5 className='text-light-green'>${lowHigh[1].toFixed(2)}</h5>
@@ -86,22 +90,23 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 								<h5 className='text-light-red'>${lowHigh[0].toFixed(2)}</h5>
 							</div>
 						</div>
-						<div className='stats me-3 border-start border-3 border-info my-1'>
-							<div className='card-body text-center'>
-								<h5 className='card-title'>Volatility</h5>
-								<h4 className='text-primary '>{volatility} %</h4>
-							</div>
-						</div>
+
 						{balance && (
-							<div className='stats me-3 border-start border-3 border-purple my-1'>
+							<div className='stats border-3 border-purple my-1'>
 								<div className='card-body text-center'>
 									<h5 className='card-title'>ETH</h5>
 									<h5 className='text-primary'>{balance.eth}</h5>
+									<h5 className='card-title'>Avg. Price</h5>
+									<h5 className='text-primary'>
+										{(initInvestment / balance.eth).toLocaleString("us-Us", {
+											maximumFractionDigits: 0,
+										})}
+									</h5>
 								</div>
 							</div>
 						)}
 						{portfolioValue && !Number.isNaN(portfolioValue) && balance ? (
-							<div className='stats me-3 border-start border-3 border-warning my-1'>
+							<div className='stats border-3 border-warning my-1'>
 								<div className='card-body text-center'>
 									<h5 className='card-title'>Value</h5>
 									<h5 id='portfolio-value' className={portfolioValue > initInvestment ? "text-success" : "text-danger"}>
@@ -119,7 +124,7 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 							</div>
 						) : null}
 						{rates && (
-							<div className='stats me-3 border-start border-3 border-danger my-1'>
+							<div className='stats border-3 border-danger my-1'>
 								<div className='card-body text-center'>
 									<h5 className='card-title'>Ask</h5>
 									<h5 className='text-light-green '>{rates.eth_ask}</h5>
