@@ -4,13 +4,12 @@ import { fadeIn } from "vanjs-toolkit";
 
 const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	// Set default width of block stat
-	// const blockWidth = { width: "130px" };
 	const [rates, setRates] = useState({});
 	const [balance, setBalance] = useState({});
 	const [lowHigh, setLowHigh] = useState([]);
 	const [latestPrice, setLatestPrice] = useState(0.0);
 	const [percentageChange, setPercentageChange] = useState(0.0);
-	const [velocity, setVelocity] = useState(0.0);
+	const [volatility, setVolatility] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const initInvestment = 120000000;
@@ -48,7 +47,7 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 		let min = Math.min.apply(Math, priceValues);
 		let max = Math.max.apply(Math, priceValues);
 		setLowHigh([min, max]);
-		setVelocity((((max - min) / min) * 100).toFixed(2));
+		setVolatility((((max - min) / min) * 100).toFixed(2));
 		let lastPrice = data.price[data.price.length - 1];
 		setLatestPrice(parseFloat(lastPrice));
 		// Ignite fade in effect
@@ -89,8 +88,8 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 						</div>
 						<div className='stats me-3 border-start border-3 border-info my-1'>
 							<div className='card-body text-center'>
-								<h5 className='card-title'>Velocity</h5>
-								<h4 className='text-primary '>{velocity} %</h4>
+								<h5 className='card-title'>Volatility</h5>
+								<h4 className='text-primary '>{volatility} %</h4>
 							</div>
 						</div>
 						{balance && (

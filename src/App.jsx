@@ -71,6 +71,10 @@ const App = () => {
 	};
 
 	const initChart = (data) => {
+		let high = Math.max.apply(Math, data.price);
+		let highIndex = data.price.indexOf(String(high));
+		let low = Math.min.apply(Math, data.price);
+		let lowIndex = data.price.indexOf(String(low));
 		let trace_price = {
 			name: "Price ($)",
 			x: data.index,
@@ -79,7 +83,7 @@ const App = () => {
 			low: data.low,
 			open: data.open,
 			increasing: { line: { color: "#2a9d8f" } },
-			decreasing: { line: { color: "#dc2f02" } },
+			decreasing: { line: { color: "#ef476f" } },
 			line: { color: "#78c6f7" },
 			type: "candlestick",
 			xaxis: "x",
@@ -135,36 +139,62 @@ const App = () => {
 			/*
 			 * TODO: largest movement
 			 */
-			// annotations: [
-			// 	{
-			// 		x: data.index[data.index.length - 1],
-			// 		y: 0.9,
-			// 		xref: "x",
-			// 		yref: "paper",
-			// 		text: "largest movement",
-			// 		font: { color: "magenta" },
-			// 		showarrow: true,
-			// 		xanchor: "right",
-			// 		ax: -20,
-			// 		ay: 0,
-			// 	},
-			// ],
-			// shapes: [
-			// 	{
-			// 		type: "rect",
-			// 		xref: "x",
-			// 		yref: "paper",
-			// 		x0: data.index[40],
-			// 		y0: 0,
-			// 		x1: data.index[data.index.length - 1],
-			// 		y1: 1,
-			// 		fillcolor: "#d3d3d3",
-			// 		opacity: 0.2,
-			// 		line: {
-			// 			width: 0,
-			// 		},
-			// 	},
-			// ],
+			annotations: [
+				{
+					x: data.index[highIndex],
+					y: 1,
+					xref: "x",
+					yref: "paper",
+					text: "High",
+					font: { color: "#2a9d8f" },
+					showarrow: true,
+					xanchor: "right",
+					ax: -15,
+					ay: 0,
+				},
+				{
+					x: data.index[lowIndex],
+					y: 1,
+					xref: "x",
+					yref: "paper",
+					text: "Low",
+					font: { color: "#ef476f" },
+					showarrow: true,
+					xanchor: "right",
+					ax: -15,
+					ay: 0,
+				},
+			],
+			shapes: [
+				{
+					type: "rect",
+					xref: "x",
+					yref: "paper",
+					x0: data.index[highIndex],
+					y0: 0,
+					x1: data.index[highIndex],
+					y1: 1,
+					fillcolor: "#2a9d8f",
+					opacity: 0.5,
+					line: {
+						width: 2,
+					},
+				},
+				{
+					type: "rect",
+					xref: "x",
+					yref: "paper",
+					x0: data.index[lowIndex],
+					y0: 0,
+					x1: data.index[lowIndex],
+					y1: 1,
+					fillcolor: "#ef476f",
+					opacity: 0.5,
+					line: {
+						width: 2,
+					},
+				},
+			],
 		};
 		let config = { responsive: true };
 		let series = [trace_price, trace_volumes];
