@@ -46,7 +46,11 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 		let min = Math.min.apply(Math, data.price);
 		let max = Math.max.apply(Math, data.price);
 		setLowHigh([min, max]);
-		setVolatility((((max - min) / min) * 100).toFixed(2));
+		console.log(data.price.indexOf(max));
+		console.log(data.price.indexOf(min));
+
+		data.price.indexOf(max) > data.price.indexOf(min) ? setVolatility((((max - min) / min) * 100).toFixed(2)) : setVolatility((((min - max) / max) * 100).toFixed(2));
+
 		let lastPrice = data.price[data.price.length - 1];
 		setLatestPrice(parseFloat(lastPrice));
 		// Ignite fade in effect
@@ -78,7 +82,7 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 									${latestPrice}
 								</h4>
 								<h5 className='card-title'>Volatility</h5>
-								<h4 className='text-primary '>{volatility} %</h4>
+								<h4 className={volatility > 0 ? "text-success" : "text-danger"}>{volatility} %</h4>
 							</div>
 						</div>
 						<div className='stats border-3 border-success my-1'>
