@@ -12,7 +12,7 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 	const [volatility, setVolatility] = useState(0.0);
 	const [portfolioValue, setPortfolioValue] = useState(null);
 	const [loading, setLoading] = useState(true);
-	const initInvestment = 130000000;
+	const initInvestment = 140000000;
 	const fixedPortfolio = 36222007;
 	useEffect(async () => {
 		// Update stats when chartData changed
@@ -46,9 +46,6 @@ const Stats = ({ upTrend, chartData, sendErrMsg }) => {
 		let min = Math.min.apply(Math, data.price);
 		let max = Math.max.apply(Math, data.price);
 		setLowHigh([min, max]);
-		console.log(data.price.indexOf(max));
-		console.log(data.price.indexOf(min));
-
 		data.price.indexOf(max) > data.price.indexOf(min) ? setVolatility((((max - min) / min) * 100).toFixed(2)) : setVolatility((((min - max) / max) * 100).toFixed(2));
 
 		let lastPrice = data.price[data.price.length - 1];
