@@ -73,8 +73,20 @@ const App = () => {
 	const initChart = (data) => {
 		let high = Math.max.apply(Math, data.price);
 		let highIndex = data.price.indexOf(high);
+		let highMarker, lowMarker;
 		let low = Math.min.apply(Math, data.price);
 		let lowIndex = data.price.indexOf(low);
+
+		// High marker
+		if (highIndex == 0) highMarker = data.index[highIndex - 1];
+		else if (highIndex == data.index.length - 1) highMarker = data.index[highIndex + 1];
+		else highMarker = data.index[highIndex];
+
+		// Low marker
+		if (lowIndex == 0) lowMarker = data.index[lowIndex - 1];
+		else if (lowIndex == data.index.length - 1) lowMarker = data.index[lowIndex + 1];
+		else lowMarker = data.index[lowIndex];
+
 		let trace_price = {
 			name: "Price ($)",
 			x: data.index,
@@ -170,7 +182,7 @@ const App = () => {
 					type: "rect",
 					xref: "x",
 					yref: "paper",
-					x0: highIndex == 0 ? data.index[highIndex] : data.index[highIndex - 1],
+					x0: highMarker,
 					y0: 0.9,
 					x1: data.index[highIndex + 1],
 					y1: 1,
@@ -186,7 +198,7 @@ const App = () => {
 					yref: "paper",
 					x0: data.index[lowIndex - 1],
 					y0: 0.3,
-					x1: lowIndex == data.index.length - 1 ? data.index[lowIndex] : data.index[lowIndex + 1],
+					x1: lowMarker,
 					y1: 0.4,
 					fillcolor: "#EDE342",
 					opacity: 0.7,
