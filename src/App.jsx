@@ -148,9 +148,7 @@ const App = () => {
 			grid: {
 				roworder: "bottom to top",
 			},
-			/*
-			 * TODO: largest movement
-			 */
+
 			annotations: [
 				{
 					x: data.index[highIndex],
