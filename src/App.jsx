@@ -71,20 +71,20 @@ const App = () => {
 	};
 
 	const initChart = (data) => {
-		let high = Math.max.apply(Math, data.price);
+		let high = Math.max(...data.price);
 		let highIndex = data.price.indexOf(high);
-		let highMarker, lowMarker;
-		let low = Math.min.apply(Math, data.price);
+		let low = Math.min(...data.price);
 		let lowIndex = data.price.indexOf(low);
 
+		// Position high and low marker in case they located at the edges
+		let highMarker, lowMarker;
 		// High marker
-		if (highIndex == 0) highMarker = data.index[highIndex - 1];
-		else if (highIndex == data.index.length - 1) highMarker = data.index[highIndex + 1];
+		if (highIndex === 0) highMarker = data.index[highIndex + 1];
+		else if (highIndex === data.index.length - 1) highMarker = data.index[highIndex - 1];
 		else highMarker = data.index[highIndex];
-
 		// Low marker
-		if (lowIndex == 0) lowMarker = data.index[lowIndex - 1];
-		else if (lowIndex == data.index.length - 1) lowMarker = data.index[lowIndex + 1];
+		if (lowIndex === 0) lowMarker = data.index[lowIndex + 1];
+		else if (lowIndex === data.index.length - 1) lowMarker = data.index[lowIndex - 1];
 		else lowMarker = data.index[lowIndex];
 
 		let trace_price = {
